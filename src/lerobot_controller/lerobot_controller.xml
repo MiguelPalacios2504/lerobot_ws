@@ -1,0 +1,10 @@
+<library path="lerobot_controller">
+    <class name="lerobot_controller/LerobotInterface"
+      type="lerobot_controller::LerobotInterface"
+      base_class_type="hardware_interface::SystemInterface"
+    >
+      <description>
+        Hardware Interface for Feetech ST3215 servos via Waveshare Bus Servo Adapter
+      </description>
+    </class>
+  </library>

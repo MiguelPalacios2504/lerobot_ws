@@ -1,0 +1,89 @@
+<?xml version="1.0" ?>
+<robot name="lerobot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:property name="PI" value="3.14159"/>
+    <xacro:property name="effort" value="30.0"/> 
+    <xacro:property name="velocity" value="10.0"/>  
+
+    <ros2_control type="system" name="RobotSystem">
+
+
+        <xacro:if value="$(arg is_sim)">
+            <xacro:if value="$(arg is_ignition)">
+            <hardware>
+                <plugin>ign_ros2_control/IgnitionSystem</plugin>
+            </hardware>
+            </xacro:if>
+
+            <xacro:unless value="$(arg is_ignition)">
+                <hardware>
+                    <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+                </hardware>
+            </xacro:unless>
+        </xacro:if>
+
+        <xacro:unless value="$(arg is_sim)">
+            <hardware>
+                <plugin>lerobot_controller/LerobotInterface</plugin>
+                <!-- Puerto UART del adaptador Waveshare Bus Servo -->
+                <param name="port">/dev/ttyACM0</param>
+                <!-- Velocidad del bus serial -->
+                <param name="baud">1000000</param>
+                <!-- Tiempo de movimiento por comando (en milisegundos) -->
+                <param name="move_time_ms">200</param>
+                <!-- IDs de los servos físicos conectados -->
+                <param name="ids">1,2,3,4,5,6</param>
+            </hardware>
+        </xacro:unless>
+
+
+        <joint name="limb1_to_base_link">
+            <command_interface name="position">
+                <param name="min">-${25*PI/180}</param>
+                <param name="max">${25*PI/180}</param>
+            </command_interface>
+            <state_interface name="position"/>
+        </joint>
+
+        <joint name="limb2_to_limb1">
+            <command_interface name="position">
+                <param name="min">-${200*PI/180}</param>
+                <param name="max">${35*PI/180}</param>
+            </command_interface>
+            <state_interface name="position"/>
+        </joint>
+
+        <joint name="limb3_to_limb2">
+            <command_interface name="position">
+                <param name="min">-${20*PI/180}</param>
+                <param name="max">${160*PI/180}</param>
+            </command_interface>
+            <state_interface name="position"/>
+        </joint>
+
+        <joint name="limb4_to_limb3">
+            <command_interface name="position">
+                <param name="min">-${PI / 2}</param>
+                <param name="max">${PI / 2}</param>
+            </command_interface>
+            <state_interface name="position"/>
+        </joint>
+
+        <joint name="limb5_to_limb4">
+            <command_interface name="position">
+                <param name="min">-${150*PI/180}</param>
+                <param name="max">${150*PI/180}</param>
+            </command_interface>
+            <state_interface name="position"/>
+        </joint>
+
+        <joint name="limb6_to_limb5">
+            <command_interface name="position">
+                <param name="min">-${100*PI/180}</param>
+                <param name="max">${10*PI/180}</param>
+            </command_interface>
+            <state_interface name="position"/>
+        </joint>
+
+    </ros2_control>
+</robot>

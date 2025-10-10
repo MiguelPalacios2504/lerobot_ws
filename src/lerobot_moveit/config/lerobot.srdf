@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<robot name="lerobot">
+    <group name="arm">
+        <joint name="limb1_to_base_link"/>
+        <joint name="limb2_to_limb1"/>
+        <joint name="limb3_to_limb2"/>
+        <joint name="limb4_to_limb3"/>
+        <joint name="limb5_to_limb4"/>
+        
+    </group>
+    <group name="gripper">
+        <joint name="limb6_to_limb5"/>
+    </group>
+
+    <group_state name="home" group="arm">
+        <joint name="limb1_to_base_link" value="0"/>
+        <joint name="limb2_to_limb1" value="0"/>
+        <joint name="limb3_to_limb2" value="0"/>
+        <joint name="limb4_to_limb3" value="0"/>
+        <joint name="limb5_to_limb4" value="0"/>
+    </group_state>
+
+    <group_state name="home" group="gripper">
+        <joint name="limb6_to_limb5" value="0"/>
+    </group_state>
+
+    <disable_collisions link1="base_link" link2="limb1_1" reason="Adjacent"/>
+    <disable_collisions link1="limb1_1" link2="limb2_1" reason="Adjacent"/>
+    <disable_collisions link1="limb1_1" link2="limb4_1" reason="Adjacent"/>
+    <disable_collisions link1="limb1_1" link2="limb5_1" reason="Adjacent"/>
+    <disable_collisions link1="limb2_1" link2="limb3_1" reason="Adjacent"/>
+    <disable_collisions link1="limb3_1" link2="limb4_1" reason="Adjacent"/>
+    <disable_collisions link1="limb4_1" link2="limb5_1" reason="Adjacent"/>
+    <disable_collisions link1="limb5_1" link2="limb6_1" reason="Adjacent"/>
+    <disable_collisions link1="limb1_1" link2="limb3_1" reason="Proximal"/>
+    <disable_collisions link1="limb2_1" link2="limb4_1" reason="Proximal"/>
+    <disable_collisions link1="limb3_1" link2="limb5_1" reason="Proximal"/>
+    <disable_collisions link1="limb4_1" link2="limb6_1" reason="Proximal"/>
+
+</robot>

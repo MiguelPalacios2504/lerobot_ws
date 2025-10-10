@@ -1,0 +1,222 @@
+<?xml version="1.0" ?>
+<robot name="lerobot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:arg name="is_sim" default="true"/>
+
+    <xacro:arg name="is_ignition" default="true"/>
+    <xacro:include filename="$(find lerobot_description)/urdf/lerobot_gazebo.xacro"/>
+    <xacro:include filename="$(find lerobot_description)/urdf/lerobot_ros2_control.xacro"/>
+    <xacro:include filename="materials.xacro"/>
+
+    
+    <xacro:property name="PI" value="3.14159"/>
+    <xacro:property name="ZERO" value="0.0"/>
+    <xacro:property name="effort" value="30.0"/> 
+    <xacro:property name="velocity" value="10.0"/>  
+
+    <link name="world"/>
+
+    <link name="base_link">
+        <inertial>
+            <origin xyz="-9.642459078465404e-05 0.019891856733790833 0.030552217737414043" rpy="0 0 0"/>
+            <mass value="0.1914817969859309"/>
+            <inertia ixx="0.000187" iyy="0.000189" izz="0.000196" ixy="0.0" iyz="-1.4e-05" ixz="0.0"/>
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="package://lerobot_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="silver"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="package://lerobot_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="limb1_1">
+        <inertial>
+            <origin xyz="-0.00024132865612201757 -0.03182683697454744 0.010623633448186703" rpy="0 0 0"/>
+            <mass value="0.12337744722531059"/>
+            <inertia ixx="0.000125" iyy="0.000123" izz="3.4e-05" ixy="0.0" iyz="4e-06" ixz="0.0"/>
+        </inertial>
+        <visual>
+            <origin xyz="0.00025 0.006978 -0.065594" rpy="0 0 0"/>
+            <geometry>
+            <mesh filename="package://lerobot_description/meshes/limb1_1.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="silver"/>
+        </visual>
+        <collision>
+            <origin xyz="0.00025 0.006978 -0.065594" rpy="0 0 0"/>
+            <geometry>
+            <mesh filename="package://lerobot_description/meshes/limb1_1.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="limb2_1">
+        <inertial>
+            <origin xyz="0.018208420998056387 0.07233063631375242 0.002577881218926492" rpy="0 0 0"/>
+            <mass value="1.1906419322267483"/>
+            <inertia ixx="0.001805" iyy="0.000521" izz="0.002049" ixy="1e-05" iyz="-0.000144" ixz="0.0"/>
+        </inertial>
+        <visual>
+            <origin xyz="0.01915 0.038251 -0.119744" rpy="0 0 0"/>
+            <geometry>
+            <mesh filename="package://lerobot_description/meshes/limb2_1.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="silver"/>
+        </visual>
+        <collision>
+            <origin xyz="0.01915 0.038251 -0.119744" rpy="0 0 0"/>
+            <geometry>
+            <mesh filename="package://lerobot_description/meshes/limb2_1.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="limb3_1">
+        <inertial>
+            <origin xyz="0.017969532376485707 -0.07703470120091216 0.0021380981205127436" rpy="0 0 0"/>
+            <mass value="1.1077317609456931"/>
+            <inertia ixx="0.001756" iyy="0.000395" izz="0.002003" ixy="1.3e-05" iyz="8.2e-05" ixz="-0.0"/>
+        </inertial>
+        <visual>
+            <origin xyz="0.01975 -0.074558 -0.146711" rpy="0 0 0"/>
+            <geometry>
+            <mesh filename="package://lerobot_description/meshes/limb3_1.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="silver"/>
+        </visual>
+        <collision>
+            <origin xyz="0.01975 -0.074558 -0.146711" rpy="0 0 0"/>
+            <geometry>
+            <mesh filename="package://lerobot_description/meshes/limb3_1.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="limb4_1">
+        <inertial>
+            <origin xyz="0.025371298583359233 -0.03515486574341366 0.0004912597019903209" rpy="0 0 0"/>
+            <mass value="0.5194224938499433"/>
+            <inertia ixx="0.000179" iyy="0.000204" izz="0.00031" ixy="3.6e-05" iyz="1e-06" ixz="0.0"/>
+        </inertial>
+        <visual>
+            <origin xyz="0.02015 0.060241 -0.153085" rpy="0 0 0"/>
+            <geometry>
+            <mesh filename="package://lerobot_description/meshes/limb4_1.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="silver"/>
+        </visual>
+        <collision>
+            <origin xyz="0.02015 0.060241 -0.153085" rpy="0 0 0"/>
+            <geometry>
+            <mesh filename="package://lerobot_description/meshes/limb4_1.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="limb5_1">
+        <inertial>
+            <origin xyz="0.0003179786709944605 -0.026780755665705133 -0.005169496291362458" rpy="0 0 0"/>
+            <mass value="0.713822465631267"/>
+            <inertia ixx="0.00047" iyy="0.000309" izz="0.000331" ixy="-1e-06" iyz="-7.3e-05" ixz="-4e-06"/>
+        </inertial>
+        <visual>
+            <origin xyz="0.00205 0.121539 -0.153617" rpy="0 0 0"/>
+            <geometry>
+            <mesh filename="package://lerobot_description/meshes/limb5_1.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="silver"/>
+        </visual>
+        <collision>
+            <origin xyz="0.00205 0.121539 -0.153617" rpy="0 0 0"/>
+            <geometry>
+            <mesh filename="package://lerobot_description/meshes/limb5_1.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="limb6_1">
+        <inertial>
+            <origin xyz="-0.01927559461099912 -0.0013144949548945517 0.03003444163375857" rpy="0 0 0"/>
+            <mass value="0.021934073854098828"/>
+            <inertia ixx="1e-05" iyy="1.2e-05" izz="3e-06" ixy="0.0" iyz="1e-06" ixz="-0.0"/>
+        </inertial>
+        <visual>
+            <origin xyz="-0.01695 0.144759 -0.174482" rpy="0 0 0"/>
+            <geometry>
+            <mesh filename="package://lerobot_description/meshes/limb6_1.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="silver"/>
+        </visual>
+        <collision>
+            <origin xyz="-0.01695 0.144759 -0.174482" rpy="0 0 0"/>
+            <geometry>
+            <mesh filename="package://lerobot_description/meshes/limb6_1.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+    </link>
+
+
+
+    <joint name="base_joint" type="fixed">
+        <parent link="world"/>
+        <child link="base_link"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+
+    <joint name="limb1_to_base_link" type="revolute">
+        <parent link="base_link"/>
+        <child link="limb1_1"/>
+        <axis xyz="-0.0 0.0 1.0"/>
+        <origin xyz="-0.00025 -0.006978 0.065594" rpy="0 0 0"/>
+        <limit lower="${-125*PI/180}" upper="${125*PI/180}" effort="${effort}" velocity="${velocity}"/>
+    </joint>
+
+    <joint name="limb2_to_limb1" type="revolute">
+        <origin xyz="-0.0189 -0.031273 0.05415" rpy="3.14159 0 0"/>
+        <parent link="limb1_1"/>
+        <child link="limb2_1"/>
+        <axis xyz="-1.0 -0.0 -0.0"/>
+        <limit lower="${-35*PI/180}" upper="${200*PI/180}" effort="${effort}" velocity="${velocity}"/>
+    </joint>
+
+    <joint name="limb3_to_limb2" type="revolute">
+        <origin xyz="-0.0006 0.112809 0.026967" rpy="3.14159 0 0"/>
+        <parent link="limb2_1"/>
+        <child link="limb3_1"/>
+        <axis xyz="-1.0 -0.0 -0.0"/>
+        <limit lower="${-160*PI/180}" upper="${20*PI/180}" effort="${effort}" velocity="${velocity}"/>
+    </joint>
+
+    <joint name="limb4_to_limb3" type="revolute">
+        <origin xyz="-0.0004 -0.134799 0.006374" rpy="0 0 0"/>
+        <parent link="limb3_1"/>
+        <child link="limb4_1"/>
+        <axis xyz="-1.0 -0.0 0.0"/>
+        <limit lower="${-PI/2}" upper="${PI/2}" effort="${effort}" velocity="${velocity}"/>
+    </joint>
+
+    <joint name="limb5_to_limb4" type="revolute">
+        <origin xyz="0.0181 -0.061298 0.000532" rpy="0 0 0"/>
+        <parent link="limb4_1"/>
+        <child link="limb5_1"/>
+        <axis xyz="0.0 -0.999962 0.008688"/>
+        <limit lower="${-150*PI/180}" upper="${150*PI/180}" effort="${effort}" velocity="${velocity}"/>
+    </joint>
+
+    <joint name="limb6_to_limb5" type="revolute">
+        <origin xyz="0.019 -0.02322 0.020865" rpy="1.57 0 0"/>
+        <parent link="limb5_1"/>
+        <child link="limb6_1"/>
+        <axis xyz="1.0 0.0 0.0"/>
+        <limit lower="${-100*PI/180}" upper="${10*PI/180}" effort="${effort}" velocity="${velocity}"/>
+    </joint>
+
+</robot>

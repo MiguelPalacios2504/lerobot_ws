@@ -1,0 +1,45 @@
+[INFO] Calibración detenida por usuario.
+[RESULTADOS FINALES]
+Servo 1:  min=992   max=3691
+Servo 2:  min=1208   max=3822
+Servo 3:  min=152   max=2403
+Servo 4:  min=1103   max=3438
+Servo 5:  min=196   max=3920
+Servo 6:  min=2055   max=3400
+
+Home
+
+Servo 1:  min=2258
+Servo 2:  min=1310 
+Servo 3:  min=2395
+Servo 4:  min=2931
+Servo 5:  min=2116
+Servo 6:  min=2056
+
+
+Limites articulares grados:
+Servo1: 125 -125
+Servo2: -35  200
+Servo3:  20  -160
+Servo4:  90  -90
+Servo5: 150  -150
+Servo6:  10  -100
+
+Sentido de giro
+
+Servo1:Positivo
+Servo2:Negativo
+Servo3:Negativo
+Servo4:Negativo
+Servo5:Negativo
+Servo6:Positivo
+
+
+        -90        0         90
+servo1:   -      2280        3280
+servo2:   -      3360        2372
+servo3: 1565     600         -
+servo4:   -      2392        1239
+servo5:   -      2139        993
+servo6: 3343     2290        -
+

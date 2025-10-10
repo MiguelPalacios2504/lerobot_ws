@@ -1,0 +1,13 @@
+---- teta       dis   a   alfa
+1   teta1       L0   L1   pi/2
+2   teta2        0  L2    0
+3   teta3        0  L3    0
+4  teta4 + pi/2  0    0  -pi/2
+5   tet5        L4+L5 0    0
+
+#Medidas en mm
+L0 = 54.2
+L1 = 30.5
+L2 = 116.1
+L3 = 134.5
+L4+L5 = 160.0

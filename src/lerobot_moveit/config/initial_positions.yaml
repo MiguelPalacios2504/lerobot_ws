@@ -1,0 +1,7 @@
+initial_position:
+  limb1_to_base_link: 0
+  limb2_to_limb1: 0
+  limb3_to_limb2: 0
+  limb4_to_limb3: 0
+  limb5_to_limb4: 0
+  limb6_to_limb5: 0
