@@ -54,18 +54,40 @@ sudo apt install ros-humble-desktop ros-humble-gazebo-ros-pkgs python3-colcon-co
 
 ## How to Run
 
+### Demo Robot Limits and joint visualization
+```bash
+ros2 launch lerobot_description displaz.launch.py is_sim:=true
+
+```
+---
+
 ### Simulation with Gazebo
 ```bash
-ros2 launch lerobot_controller sim_controller.launch.py
 ros2 launch lerobot_description gazebo.launch.py
+ros2 launch lerobot_controller controller.launch.py is_sim:=true mode:=moveit
+```
+test movement
+
+```ros2 topic pub /arm_controller/joint_trajectory trajectory_msgs/msg/JointTrajectory "{
+  joint_names: ['limb1_to_base_link', 'limb2_to_limb1', 'limb3_to_limb2', 'limb4_to_limb3', 'limb5_to_limb4'],
+  points: [{
+    positions: [0.3, 0.4, -0.2, 0.1, 0.0],
+    time_from_start: {sec: 3}
+  }]
+}"
 ```
 
-### Visualization with RViz + Gazebo
+### Simulation Gazebo and Rviz
+
+
 ```bash
 ros2 launch lerobot_description gazebo.launch.py
+ros2 launch lerobot_controller controller.launch.py is_sim:=true mode:=moveit
+ros2 launch lerobot_description rviz.launch.py is_sim:=true
 ```
 
 ---
+
 
 ### Real Robot Controller
 
@@ -79,19 +101,11 @@ ros2 launch lerobot_controller controller.launch.py sim:=False
 
 ### Motion Planning with MoveIt
 
-**Real robot:**
+**Real robot:** it depends in which mode you would like to work is_sim:true (simulation) is_sim: false (real robot)
 ```bash
-ros2 launch lerobot_moveit moveit.launch.py sim:=False
+os2 launch lerobot_moveit moveit.launch.py
 ```
 
-**Simulated robot:**
-```bash
-ros2 launch lerobot_moveit moveit.launch.py
-```
-
-🖼️ *Add image or GIF of MoveIt planning here.*
-
----
 
 ## Under Development
 
@@ -115,7 +129,11 @@ lerobot_ws/
 │   ├── lerobot_description/     # URDF, meshes, RViz launch
 │   ├── lerobot_controller/      # Nodes for motion control
 │   ├── lerobot_cpp_examples/    # C++ kinematics examples
-│   └── ...
+│   ├── lerobot_brinup/    	 # Robot + alexa commands
+│   ├── lerobot_cpp_examples/    # C++ kinematics examples
+│   ├── lerobot_moveit		 # Robot Motion planner
+│   ├── lerobot_cpp_examples/    # C++ kinematics examples
+│   └── lerobot_remoto		 # Alexa Interface
 ├── README.md
 └── .gitignore
 ```

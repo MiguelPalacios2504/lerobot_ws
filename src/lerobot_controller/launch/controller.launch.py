@@ -1,95 +1,134 @@
 import os
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
-from launch.conditions import UnlessCondition
-from launch.substitutions import LaunchConfiguration, Command
+from launch.actions import DeclareLaunchArgument, GroupAction, TimerAction
+from launch.conditions import IfCondition, UnlessCondition
+from launch.substitutions import LaunchConfiguration, Command, PythonExpression
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 from ament_index_python.packages import get_package_share_directory
 
 
 def generate_launch_description():
-
-    # === Argumentos ===
     is_sim_arg = DeclareLaunchArgument(
         "is_sim",
-        default_value="False",
-        description="Launch in simulation mode if True"
+        default_value="false",
+        description="true → simulación (Gazebo/RViz) | false → hardware real",
+    )
+
+    mode_arg = DeclareLaunchArgument(
+        "mode",
+        default_value="moveit",
+        description="Modo de simulación: 'gui' (RViz sliders) o 'moveit'",
     )
 
     is_sim = LaunchConfiguration("is_sim")
+    mode = LaunchConfiguration("mode")
 
-    # === URDF / Xacro ===
+    pkg_desc = get_package_share_directory("lerobot_description")
+    pkg_ctrl = get_package_share_directory("lerobot_controller")
+    pkg_moveit = get_package_share_directory("lerobot_controller")
+
+    controllers_hw = os.path.join(pkg_ctrl, "config", "lerobot_controllers.yaml")
+    controllers_sim_gui = os.path.join(pkg_ctrl, "config", "lerobot_controllers_gui.yaml")
+    controllers_sim_moveit = os.path.join(pkg_moveit, "config", "moveit_controllers.yaml")
+
     robot_description = ParameterValue(
-        Command([
-            "xacro ",
-            os.path.join(
-                get_package_share_directory("lerobot_description"),
-                "urdf",
-                "lerobot.urdf.xacro"
-            ),
-            " is_sim:=", is_sim
-        ]),
-        value_type=str
+        Command(["xacro ", os.path.join(pkg_desc, "urdf", "lerobot.urdf.xacro")]),
+        value_type=str,
     )
 
-    # === Nodo: Robot State Publisher ===
-    # Se usa en ambos modos, pero puede omitirse en hardware si quieres
-    robot_state_publisher_node = Node(
+    robot_state_publisher = Node(
         package="robot_state_publisher",
         executable="robot_state_publisher",
-        output="screen",
         parameters=[{"robot_description": robot_description}],
+        output="screen",
     )
 
-    # === Nodo: ros2_control_node (solo hardware) ===
-    controller_manager = Node(
+    # Real robot
+    controller_manager_hw = Node(
         package="controller_manager",
         executable="ros2_control_node",
+        parameters=[{"robot_description": robot_description}, controllers_hw],
+        condition=UnlessCondition(is_sim),
         output="screen",
+    )
+
+    spawners_hw = [
+        Node(
+            package="controller_manager",
+            executable="spawner",
+            arguments=[ctrl, "--controller-manager", "/controller_manager"],
+            condition=UnlessCondition(is_sim),
+            output="screen",
+        )
+        for ctrl in ["joint_state_broadcaster", "arm_controller", "gripper_controller"]
+    ]
+    hardware_group = GroupAction([controller_manager_hw] + spawners_hw)
+
+    # Just SLiders
+    controller_manager_sim_gui = Node(
+        package="controller_manager",
+        executable="ros2_control_node",
         parameters=[
-            {"robot_description": robot_description,
-             "use_sim_time": is_sim},
-            os.path.join(
-                get_package_share_directory("lerobot_controller"),
-                "config",
-                "lerobot_controllers.yaml"
-            ),
+            {"robot_description": robot_description, "use_sim_time": True},
+            controllers_sim_gui,
         ],
-        condition=UnlessCondition(is_sim),  # 🔸 Solo se ejecuta si NO es simulación
-    )
-
-    # === Spawners (solo hardware) ===
-    joint_state_broadcaster_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["joint_state_broadcaster", "--controller-manager", "/controller_manager"],
+        condition=IfCondition(PythonExpression(["'", is_sim, "' == 'true' and '", mode, "' == 'gui'"])),
         output="screen",
-        condition=UnlessCondition(is_sim),
     )
 
-    arm_controller_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["arm_controller", "--controller-manager", "/controller_manager"],
+    spawners_sim_gui = [
+        Node(
+            package="controller_manager",
+            executable="spawner",
+            arguments=[ctrl, "--controller-manager", "/controller_manager"],
+            condition=IfCondition(PythonExpression(["'", is_sim, "' == 'true' and '", mode, "' == 'gui'"])),
+            output="screen",
+        )
+        for ctrl in ["joint_state_broadcaster", "arm_controller", "gripper_controller"]
+    ]
+
+    gui_bridge = Node(
+        package="lerobot_controller",
+        executable="gui_to_controller_bridge",
+        name="gui_to_controller_bridge",
+        parameters=[{"use_sim_time": True}],
         output="screen",
-        condition=UnlessCondition(is_sim),
+        condition=IfCondition(PythonExpression(["'", mode, "' == 'gui'"])),
     )
 
-    gripper_controller_spawner = Node(
+    sim_gui_group = GroupAction([controller_manager_sim_gui] + spawners_sim_gui + [TimerAction(period=2.0, actions=[gui_bridge])])
+
+    # Moveit
+    controller_manager_sim_moveit = Node(
         package="controller_manager",
-        executable="spawner",
-        arguments=["gripper_controller", "--controller-manager", "/controller_manager"],
+        executable="ros2_control_node",
+        parameters=[
+            {"robot_description": robot_description, "use_sim_time": True},
+            controllers_sim_moveit,
+        ],
+        condition=IfCondition(PythonExpression(["'", is_sim, "' == 'true' and '", mode, "' == 'moveit'"])),
         output="screen",
-        condition=UnlessCondition(is_sim),
     )
 
-    # === Descripción del lanzamiento ===
+    spawners_sim_moveit = [
+        Node(
+            package="controller_manager",
+            executable="spawner",
+            arguments=[ctrl, "--controller-manager", "/controller_manager"],
+            condition=IfCondition(PythonExpression(["'", is_sim, "' == 'true' and '", mode, "' == 'moveit'"])),
+            output="screen",
+        )
+        for ctrl in ["joint_state_broadcaster", "arm_controller", "gripper_controller"]
+    ]
+
+    sim_moveit_group = GroupAction([controller_manager_sim_moveit] + spawners_sim_moveit)
+
     return LaunchDescription([
         is_sim_arg,
-        robot_state_publisher_node,
-        controller_manager,
-        joint_state_broadcaster_spawner,
-        arm_controller_spawner,
-        gripper_controller_spawner,
+        mode_arg,
+        robot_state_publisher,
+        hardware_group,
+        sim_gui_group,
+        sim_moveit_group,
     ])

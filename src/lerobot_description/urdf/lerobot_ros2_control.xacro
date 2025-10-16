@@ -10,17 +10,36 @@
 
         <xacro:if value="$(arg is_sim)">
             <xacro:if value="$(arg is_ignition)">
-            <hardware>
-                <plugin>ign_ros2_control/IgnitionSystem</plugin>
-            </hardware>
+                <hardware>
+                <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+
+                <!-- Habilita reloj de simulación -->
+                <param name="use_sim_time">true</param>
+
+                <!-- Carga de controladores -->
+                <plugin>gz_ros2_control/GazeboSimROS2ControlPlugin</plugin>
+                <param name="controller_manager_config_file">
+                    $(find lerobot_controller)/config/lerobot_controllers.yaml
+                </param>
+
+                </hardware>
             </xacro:if>
 
             <xacro:unless value="$(arg is_ignition)">
                 <hardware>
-                    <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+                <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+                <param name="use_sim_time">true</param>
+
+                <plugin>gz_ros2_control/GazeboSimROS2ControlPlugin</plugin>
+                <param name="controller_manager_config_file">
+                    $(find lerobot_controller)/config/lerobot_controllers.yaml
+                </param>
                 </hardware>
             </xacro:unless>
         </xacro:if>
+
+
+
 
         <xacro:unless value="$(arg is_sim)">
             <hardware>

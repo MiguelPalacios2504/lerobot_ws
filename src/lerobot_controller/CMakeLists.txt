@@ -39,6 +39,17 @@ ament_target_dependencies(${PROJECT_NAME}
 
 pluginlib_export_plugin_description_file(hardware_interface lerobot_controller.xml)
 
+
+add_executable(gui_to_controller_bridge src/gui_to_controller_bridge.cpp)
+ament_target_dependencies(gui_to_controller_bridge
+  rclcpp
+  sensor_msgs
+  trajectory_msgs
+)
+
+install(TARGETS ${PROJECT_NAME} gui_to_controller_bridge
+  DESTINATION lib/${PROJECT_NAME})
+
 install(
   DIRECTORY include/
   DESTINATION include/

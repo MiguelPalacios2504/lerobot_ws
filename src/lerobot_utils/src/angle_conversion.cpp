@@ -31,7 +31,6 @@ private:
         RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "Requested to convert euler angles roll: " << req->roll << 
                                                          ", pitch: " << req->pitch << ", yaw: " << req->yaw <<
                                                          ", into a quaternion.");
-        // Calculate quaternion from euler
         tf2::Quaternion q;
         q.setRPY(req->roll, req->pitch, req->yaw);
         res->x = q.getX();
@@ -49,7 +48,6 @@ private:
         RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "Requested to convert quaternion x: " << req->x << 
                                                          ", y: " << req->y << ", z: " << req->z << 
                                                          ", w: " << req->w << ", into euler angles.");
-        // Calculate euler from quaternion
         tf2::Quaternion q(req->x, req->y, req->z, req->w);
         tf2::Matrix3x3 m(q);
         m.getRPY(res->roll, res->pitch, res->yaw);

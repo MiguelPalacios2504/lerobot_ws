@@ -11,12 +11,10 @@ CallbackReturn LerobotInterface::on_init(const hardware_interface::HardwareInfo 
   auto ret = hardware_interface::SystemInterface::on_init(info);
   if (ret != CallbackReturn::SUCCESS) return ret;
 
-  // Lee parámetros (opcionales) del hardware_info
   try {
     if (info_.hardware_parameters.count("port")) port_ = info_.hardware_parameters.at("port");
     if (info_.hardware_parameters.count("baud")) baud_ = std::stoi(info_.hardware_parameters.at("baud"));
     if (info_.hardware_parameters.count("move_time_ms")) move_time_ms_ = static_cast<uint16_t>(std::stoi(info_.hardware_parameters.at("move_time_ms")));
-    // IDs separados por comas (opcional): "1,2,3,4,5,6"
     if (info_.hardware_parameters.count("ids")) {
       ids_.clear();
       std::string s = info_.hardware_parameters.at("ids");
@@ -34,27 +32,23 @@ CallbackReturn LerobotInterface::on_init(const hardware_interface::HardwareInfo 
     return CallbackReturn::FAILURE;
   }
 
-  const size_t n = info_.joints.size(); // esperamos 6
+  const size_t n = info_.joints.size();
   position_commands_.assign(n, 0.0);
   position_states_.assign(n, 0.0);
-  prev_position_commands_.assign(n, 1e9); // fuerza primer write
+  prev_position_commands_.assign(n, 1e9);
 
   offsets_raw_ = {
-    2301 - 122,   // Servo 1  → 2179
-    2586 + 1008,  // Servo 2  → 3594
-    345,    // Servo 3  → 1354
-    2286 + 68,    // Servo 4  → 2354
-    2064 + 101,   // Servo 5  → 2165
-    2275          // Servo 6  (sin cambio)
+    2179,
+    3594,
+    345,
+    2354,
+    2165,
+    2275 
   };
 
   // Sentidos según calibración física
   signs_ = {+1, -1, -1, -1, -1, +1};
-
-  // Escala de conversión: 4096 pasos / 2π rad
   scale_ = 4096.0 / (2.0 * M_PI);
-  // Si algún eje invierte sentido, ajusta aquí:
-  // signs_[k] = -1;
 
   if (ids_.size() != n) {
     RCLCPP_WARN(rclcpp::get_logger("LerobotInterface"),
@@ -161,12 +155,9 @@ LerobotInterface::write(const rclcpp::Time &, const rclcpp::Duration &)
   return hardware_interface::return_type::OK;
 }
 
-
-// --------- utilidades de conversión ----------
 uint16_t LerobotInterface::rad_to_raw(int i, double rad) const {
   // raw = offset + sign * scale * rad
   double val = static_cast<double>(offsets_raw_[i]) + static_cast<double>(signs_[i]) * (scale_ * rad);
-  // saturación 0..4095
   if (val < 0.0) val = 0.0;
   if (val > 4095.0) val = 4095.0;
   return static_cast<uint16_t>(std::lround(val));
@@ -178,6 +169,6 @@ double LerobotInterface::raw_to_rad(int i, uint16_t raw) const {
   return static_cast<double>(signs_[i]) * rad;
 }
 
-} // namespace lerobot_controller
+}
 
 PLUGINLIB_EXPORT_CLASS(lerobot_controller::LerobotInterface, hardware_interface::SystemInterface)

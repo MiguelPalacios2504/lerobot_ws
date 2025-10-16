@@ -1,0 +1,29 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 50
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    arm_controller:
+      type: joint_trajectory_controller/JointGroupPositionController
+
+    gripper_controller:
+      type: joint_trajectory_controller/JointGroupPositionController
+
+
+# --- Hardware fake para simulación GUI (sin Gazebo) ---
+robot_system:
+  ros__parameters:
+    joints:
+      - limb1_to_base_link
+      - limb2_to_limb1
+      - limb3_to_limb2
+      - limb4_to_limb3
+      - limb5_to_limb4
+      - limb6_to_limb5
+
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
