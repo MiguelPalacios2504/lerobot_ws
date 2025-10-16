@@ -59,9 +59,7 @@ sudo apt install ros-humble-desktop ros-humble-gazebo-ros-pkgs python3-colcon-co
 ros2 launch lerobot_description displaz.launch.py is_sim:=true
 
 ```
-<p align="center">
-  <img src="https://github.com/MiguelPalacios2504/lerobot_ws/blob/main/iamges/demo.png" alt="LeRobot in demo" width="600"/>
-</p>
+![LeRobot in demo](docs/robot_demo.png)
 
 ---
 
