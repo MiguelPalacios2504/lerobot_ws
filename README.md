@@ -59,6 +59,10 @@ sudo apt install ros-humble-desktop ros-humble-gazebo-ros-pkgs python3-colcon-co
 ros2 launch lerobot_description displaz.launch.py is_sim:=true
 
 ```
+<p align="center">
+  <img src="iamges/demo.png" alt="LeRobot in demo" width="600"/>
+</p>
+
 ---
 
 ### Simulation with Gazebo
@@ -76,6 +80,9 @@ test movement
   }]
 }"
 ```
+<p align="center">
+  <img src="iamges/gazebo.png" alt="LeRobot in Gazebo" width="600"/>
+</p>
 
 ### Simulation Gazebo and Rviz
 
@@ -105,7 +112,9 @@ ros2 launch lerobot_controller controller.launch.py sim:=False
 ```bash
 os2 launch lerobot_moveit moveit.launch.py
 ```
-
+<p align="center">
+  <img src="iamges/moveit.png" alt="LeRobot with moveit" width="600"/>
+</p>
 
 ## Under Development
 
