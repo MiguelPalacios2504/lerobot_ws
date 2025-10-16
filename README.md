@@ -60,7 +60,7 @@ ros2 launch lerobot_description displaz.launch.py is_sim:=true
 
 ```
 <p align="center">
-  <img src="iamges/demo.png" alt="LeRobot in demo" width="600"/>
+  <img src="https://github.com/MiguelPalacios2504/lerobot_ws/blob/main/iamges/demo.png" alt="LeRobot in demo" width="600"/>
 </p>
 
 ---
