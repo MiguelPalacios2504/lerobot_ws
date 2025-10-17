@@ -101,9 +101,9 @@ public:
     };
     writeRegs(id, ADDR_GOAL_POS, data);
 
-    tcdrain(fd_);          // Espera a que todos los bytes se transmitan
-    usleep(2000);          // (2 ms) deja que el transceptor libere la línea RS-485
-    tcflush(fd_, TCIFLUSH); // Limpia posibles residuos en el buffer de entrada
+    tcdrain(fd_);
+    usleep(2000);
+    tcflush(fd_, TCIFLUSH); 
   }
 
 private:

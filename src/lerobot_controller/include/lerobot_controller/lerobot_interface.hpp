@@ -49,13 +49,13 @@ private:
 
   std::vector<std::deque<double>> vel_history_;
   std::vector<double> vel_filtered_;
-  size_t vel_filter_window_ = 5;   // media móvil de 5 muestras
-  double vel_deadband_ = 0.05;     // 0.05 rad/s como zona muerta
+  size_t vel_filter_window_ = 5;
+  double vel_deadband_ = 0.05;
 
   std::vector<std::deque<double>> pos_history_;
   std::vector<double> pos_filtered_;
-  const size_t pos_filter_window_ = 15;  // promedio de 15 lecturas (~0.3 s a 50 Hz)
-  const double pos_deadband_ = 0.0005;   // 0.5 mrad (~0.03 °)
+  const size_t pos_filter_window_ = 15;
+  const double pos_deadband_ = 0.0005;
 
   // utilidades
   uint16_t rad_to_raw(int i, double rad) const;

@@ -29,8 +29,21 @@ Set the servos to the **neutral position**:
 ```
 Joint angles: 0°, 90°, -90°, 0°, 0°, 0°
 ```
+<p align="center">
+  <img src="images/seting.jpge" alt="LeRobot setting position" width="600"/>
+</p>
 
-> ⚠️ These offsets are important for correct inverse kinematics and feedback readings.
+Change the offset so you can get in this position the next values, otherwise you will have to do extra setting actions.
+
+```
+Default values: 2179, 3594, 345, 2354, 2165, 2275
+```
+
+<p align="center">
+  <img src="images/feetech.jpge" alt="Feetech software" width="600"/>
+</p>
+
+> 
 
 🖼️ *Add image here showing the correct servo positions.*
 
