@@ -45,8 +45,6 @@ Default values: 2179, 3594, 345, 2354, 2165, 2275
 
 > 
 
-🖼️ *Add image here showing the correct servo positions.*
-
 ---
 
 ## 🧩 Requirements
