@@ -118,7 +118,7 @@ ros2 launch lerobot_moveit moveit.launch.py
 </p>
 
 <p align="center">
-  <img src="images/moveit_real.png" alt="LeRobot real with moveit" width="600"/>
+  <img src="images/moveit_real.jpg" alt="LeRobot real with moveit" width="600"/>
 </p>
 
 ## Under Development
