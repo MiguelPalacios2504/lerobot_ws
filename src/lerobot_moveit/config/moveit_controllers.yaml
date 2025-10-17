@@ -1,26 +1,22 @@
-move_group:
-  ros__parameters:
-    # Plugin
-    moveit_controller_manager: moveit_simple_controller_manager/MoveItSimpleControllerManager
+moveit_controller_manager: moveit_simple_controller_manager/MoveItSimpleControllerManager
 
-    # Controladores de MoveIt
-    moveit_simple_controller_manager:
-      controller_names: [arm_controller, gripper_controller]
+moveit_simple_controller_manager:
+  controller_names: [arm_controller, gripper_controller]
 
-      arm_controller:
-        type: FollowJointTrajectory
-        action_ns: follow_joint_trajectory
-        default: true
-        joints:
-          - limb1_to_base_link
-          - limb2_to_limb1
-          - limb3_to_limb2
-          - limb4_to_limb3
-          - limb5_to_limb4
+  arm_controller:
+    type: FollowJointTrajectory
+    action_ns: follow_joint_trajectory
+    default: true
+    joints:
+      - limb1_to_base_link
+      - limb2_to_limb1
+      - limb3_to_limb2
+      - limb4_to_limb3
+      - limb5_to_limb4
 
-      gripper_controller:
-        type: FollowJointTrajectory
-        action_ns: follow_joint_trajectory
-        default: true
-        joints:
-          - limb6_to_limb5
+  gripper_controller:
+    type: FollowJointTrajectory
+    action_ns: follow_joint_trajectory
+    default: true
+    joints:
+      - limb6_to_limb5

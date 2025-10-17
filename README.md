@@ -102,18 +102,25 @@ For running the **real robot** (connected via `/dev/ttyACM0`, baudrate `1000000`
 ```bash
 ros2 launch lerobot_controller controller.launch.py sim:=False
 ```
-
+<p align="center">
+  <img src="images/rviz_real.png" alt="LeRobot real with rviz" width="600"/>
+</p>
 ---
 
 ### Motion Planning with MoveIt
 
 **Real robot:** it depends in which mode you would like to work is_sim:true (simulation) is_sim: false (real robot)
 ```bash
-os2 launch lerobot_moveit moveit.launch.py
+ros2 launch lerobot_moveit moveit.launch.py
 ```
 <p align="center">
   <img src="images/moveit.png" alt="LeRobot with moveit" width="600"/>
 </p>
+
+<p align="center">
+  <img src="images/moveit_real.png" alt="LeRobot real with moveit" width="600"/>
+</p>
+
 ## Under Development
 
 Some modules are still being integrated:

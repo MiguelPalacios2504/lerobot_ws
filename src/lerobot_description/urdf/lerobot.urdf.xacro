@@ -192,7 +192,7 @@
         <parent link="limb2_1"/>
         <child link="limb3_1"/>
         <axis xyz="-1.0 -0.0 -0.0"/>
-        <limit lower="${-160*PI/180}" upper="${20*PI/180}" effort="${effort}" velocity="${velocity}"/>
+        <limit lower="${-181*PI/180}" upper="${20*PI/180}" effort="${effort}" velocity="${velocity}"/>
     </joint>
 
     <joint name="limb4_to_limb3" type="revolute">
