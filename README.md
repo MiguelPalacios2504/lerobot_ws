@@ -13,7 +13,7 @@ It includes:
 - URDF/Xacro models for visualization  
 - Basic kinematics and control nodes (C++/Python)  
 - Launch files for bringing up the robot and testing movement  
-- Example configurations for MoveIt and Gazebo (coming soon)
+- MoveIt 2 motion planning and Gazebo Sim (gz) integration
 
 The mechanical frame is based on the work of [AntoBrandi](https://github.com/AntoBrandi), whose open-source designs inspired me to learn by building.
 
@@ -49,16 +49,38 @@ Default values: 2179, 3594, 345, 2354, 2165, 2275
 
 ## 🧩 Requirements
 
-Tested on:
-- **Ubuntu 22.04**
-- **ROS 2 Humble Hawksbill**
-- **colcon**, **rviz2**, **gazebo_ros_pkgs**
-- **rclcpp**, **geometry_msgs**, **sensor_msgs**
+> **Rama `jazzy`:** Ubuntu 24.04 + ROS 2 Jazzy  
+> **Rama `main`:** Ubuntu 22.04 + ROS 2 Humble
 
-Install the basic dependencies:
+Tested on (rama `jazzy`):
+- **Ubuntu 24.04 Noble**
+- **ROS 2 Jazzy Jalisco**
+- **colcon**, **rviz2**, **ros_gz_sim**, **gz_ros2_control**, **MoveIt 2**
+
+Install dependencies:
 ```bash
 sudo apt update
-sudo apt install ros-humble-desktop ros-humble-gazebo-ros-pkgs python3-colcon-common-extensions
+sudo apt install \
+  ros-jazzy-desktop \
+  ros-jazzy-ros-gz \
+  ros-jazzy-gz-ros2-control \
+  ros-jazzy-moveit \
+  ros-jazzy-moveit-planners-ompl \
+  ros-jazzy-pilz-industrial-motion-planner \
+  ros-jazzy-moveit-ros-visualization \
+  ros-jazzy-ros2-control \
+  ros-jazzy-xacro \
+  python3-colcon-common-extensions
+```
+
+> Si `ros-jazzy-moveit-configs-utils` no aparece en apt, no es necesario: esta rama carga la config MoveIt desde `lerobot_moveit/launch/moveit_config_loader.py`.
+
+Build the workspace:
+```bash
+source /opt/ros/jazzy/setup.bash
+cd lerobot_ws
+colcon build --symlink-install
+source install/setup.bash
 ```
 
 ---
@@ -67,7 +89,7 @@ sudo apt install ros-humble-desktop ros-humble-gazebo-ros-pkgs python3-colcon-co
 
 ### Demo Robot Limits and joint visualization
 ```bash
-ros2 launch lerobot_description displaz.launch.py is_sim:=true
+ros2 launch lerobot_description display.launch.py is_sim:=true
 
 ```
 <p align="center">
@@ -75,10 +97,10 @@ ros2 launch lerobot_description displaz.launch.py is_sim:=true
 </p>
 ---
 
-### Simulation with Gazebo
+### Simulation with Gazebo Sim (gz)
 ```bash
 ros2 launch lerobot_description gazebo.launch.py is_sim:=true
-ros2 launch lerobot_controller controller.launch.py is_sim:=true mode:=moveit
+ros2 launch lerobot_controller controller.launch.py is_sim:=true
 ```
 test movement
 
@@ -94,13 +116,19 @@ test movement
   <img src="images/gazebo.png" alt="LeRobot in Gazebo" width="600"/>
 </p>
 
-### Simulation Gazebo and Rviz
+### Simulation Gazebo Sim and RViz
 
 
 ```bash
-ros2 launch lerobot_description gazebo.launch.py
+ros2 launch lerobot_description gazebo.launch.py is_sim:=true
 ros2 launch lerobot_controller controller.launch.py is_sim:=true
 ros2 launch lerobot_description rviz.launch.py is_sim:=true
+```
+
+### Full simulated stack (Gazebo + control + MoveIt + remote)
+
+```bash
+ros2 launch lerobot_bringup simulated_robot.launch.py
 ```
 
 ---
@@ -143,6 +171,22 @@ ros2 launch lerobot_bringup simulated_robot.launch.py
 lerobot_cpp_examples/scripts/lero_ik
 lerobot_cpp_exmaples/scripts/lero_dk
 
+ros2 launch lerobot_description gazebo.launch.py \
+  sim_controllers_config:=lerobot_controllers_sim_teleop.yaml
+  
+ros2 launch lerobot_controller controller.launch.py \
+  is_sim:=true teleop_follower:=true
+
+ros2 launch lerobot_controller controller.launch.py \
+  is_sim:=false ns:=leader leader_only:=true uart_port:=/dev/ttyACM0
+
+ros2 launch lerobot_teleoperation teleop_mirror.launch.py \
+  source_ns:=leader \
+  target_ns:=/ \
+  command_mode:=forward \
+  publish_deadband:=0.002 \
+  smoothing_alpha:=1.0
+
 ```
 
 ---
@@ -152,14 +196,15 @@ lerobot_cpp_exmaples/scripts/lero_dk
 ```
 lerobot_ws/
 ├── src/
-│   ├── lerobot_description/     # URDF, meshes, RViz launch
-│   ├── lerobot_controller/      # Nodes for motion control
-│   ├── lerobot_cpp_examples/    # C++ kinematics examples
-│   ├── lerobot_brinup/    	 # Robot + alexa commands
-│   ├── lerobot_cpp_examples/    # C++ kinematics examples
-│   ├── lerobot_moveit		 # Robot Motion planner
-│   ├── lerobot_cpp_examples/    # C++ kinematics examples
-│   └── lerobot_remoto		 # Alexa Interface
+│   ├── lerobot_description/     # URDF, meshes, RViz/Gazebo launch
+│   ├── lerobot_controller/      # ros2_control + Feetech hardware interface
+│   ├── lerobot_moveit/          # MoveIt 2 motion planning
+│   ├── lerobot_bringup/         # Full-stack launch files
+│   ├── lerobot_cpp_examples/    # C++ kinematics and MoveIt examples
+│   ├── lerobot_teleoperation/   # Dual-arm teleoperation
+│   ├── lerobot_remoto/          # Remote / Alexa interface
+│   ├── lerobot_msgs/            # Custom messages and actions
+│   └── lerobot_utils/           # Shared utilities
 ├── README.md
 └── .gitignore
 ```

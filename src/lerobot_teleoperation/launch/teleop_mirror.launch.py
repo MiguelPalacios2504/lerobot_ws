@@ -16,7 +16,11 @@ GRIPPER_JOINTS = ['limb6_to_limb5']
 
 def generate_launch_description():
     source_ns_arg = DeclareLaunchArgument('source_ns', default_value='leader')
-    target_ns_arg = DeclareLaunchArgument('target_ns', default_value='follower')
+    target_ns_arg = DeclareLaunchArgument(
+        'target_ns',
+        default_value='follower',
+        description='Namespace del follower. Usa "/" para sim/Gazebo sin namespace (topics en /arm_controller/...)',
+    )
     mode_arg = DeclareLaunchArgument('command_mode', default_value='forward')
     deadband_arg = DeclareLaunchArgument('publish_deadband', default_value='0.004')
     alpha_arg = DeclareLaunchArgument('smoothing_alpha', default_value='0.92')

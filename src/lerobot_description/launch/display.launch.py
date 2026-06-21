@@ -1,11 +1,18 @@
 import os
+import sys
 from launch import LaunchDescription
-from launch_ros.actions import Node
 from launch.actions import DeclareLaunchArgument, TimerAction, GroupAction
 from launch.substitutions import LaunchConfiguration, Command, PythonExpression
 from launch.conditions import IfCondition, UnlessCondition
+from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 from ament_index_python.packages import get_package_share_directory
+
+_LAUNCH_DIR = os.path.join(get_package_share_directory("lerobot_description"), "launch")
+if _LAUNCH_DIR not in sys.path:
+    sys.path.insert(0, _LAUNCH_DIR)
+
+from jazzy_compat import ignition_xacro_arg  # noqa: E402
 
 
 def generate_launch_description():
@@ -28,8 +35,13 @@ def generate_launch_description():
     is_sim = LaunchConfiguration("is_sim")
 
     robot_description = ParameterValue(
-        Command(["xacro ", LaunchConfiguration("model")]),
-        value_type=str
+        Command([
+            "xacro ",
+            LaunchConfiguration("model"),
+            " is_sim:=", is_sim,
+            " is_ignition:=", ignition_xacro_arg(),
+        ]),
+        value_type=str,
     )
 
     robot_state_publisher = Node(

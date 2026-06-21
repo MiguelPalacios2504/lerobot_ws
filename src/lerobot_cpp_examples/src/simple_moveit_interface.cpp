@@ -1,7 +1,8 @@
 #include <rclcpp/rclcpp.hpp>
-#include <moveit/move_group_interface/move_group_interface.h>
+#include <moveit/move_group_interface/move_group_interface.hpp>
 
 #include <memory>
+#include <thread>
 
 
 void move_robot(const std::shared_ptr<rclcpp::Node> node)
@@ -47,9 +48,16 @@ int main(int argc, char **argv)
 {
   rclcpp::init(argc, argv);
 
-  std::shared_ptr<rclcpp::Node> node = rclcpp::Node::make_shared("simple_moveit_interface");
+  auto node = rclcpp::Node::make_shared("simple_moveit_interface");
+
+  // MoveIt 2 on Jazzy requires the node to be spinning while interfaces are used.
+  rclcpp::executors::SingleThreadedExecutor executor;
+  executor.add_node(node);
+  auto spinner = std::thread([&executor]() { executor.spin(); });
+
   move_robot(node);
-  
-  rclcpp::spin(node);
+
   rclcpp::shutdown();
+  spinner.join();
+  return 0;
 }

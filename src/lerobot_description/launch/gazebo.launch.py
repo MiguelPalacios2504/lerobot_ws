@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 from ament_index_python.packages import get_package_share_directory
 
@@ -8,6 +9,12 @@ from launch.substitutions import Command, LaunchConfiguration
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
+
+_LAUNCH_DIR = os.path.join(get_package_share_directory("lerobot_description"), "launch")
+if _LAUNCH_DIR not in sys.path:
+    sys.path.insert(0, _LAUNCH_DIR)
+
+from jazzy_compat import gz_physics_engine_args, ignition_xacro_arg  # noqa: E402
 
 
 def generate_launch_description():
@@ -26,21 +33,24 @@ def generate_launch_description():
         description="Must be true for Gazebo simulation",
     )
 
+    sim_controllers_config_arg = DeclareLaunchArgument(
+        "sim_controllers_config",
+        default_value="lerobot_controllers_sim.yaml",
+        description="YAML de ros2_control cargado por el plugin de Gazebo",
+    )
+
     gazebo_resource_path = SetEnvironmentVariable(
         name="GZ_SIM_RESOURCE_PATH",
         value=[str(Path(pkg_desc).parent.resolve())],
     )
-
-    ros_distro = os.environ.get("ROS_DISTRO", "humble")
-    is_ignition = "true" if ros_distro == "humble" else "false"
-    physics_engine = "" if ros_distro == "humble" else "--physics-engine gz-physics-bullet-featherstone-plugin"
 
     robot_description = ParameterValue(
         Command([
             "xacro ",
             LaunchConfiguration("model"),
             " is_sim:=", LaunchConfiguration("is_sim"),
-            " is_ignition:=", is_ignition,
+            " is_ignition:=", ignition_xacro_arg(),
+            " sim_controllers_config:=", LaunchConfiguration("sim_controllers_config"),
         ]),
         value_type=str,
     )
@@ -59,7 +69,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(
             os.path.join(pkg_ros_gz, "launch", "gz_sim.launch.py")
         ),
-        launch_arguments={"gz_args": f"-r -v 4 empty.sdf {physics_engine}"}.items(),
+        launch_arguments={"gz_args": f"-r -v 4 empty.sdf {gz_physics_engine_args()}"}.items(),
     )
 
     gz_spawn_entity = Node(
@@ -81,6 +91,7 @@ def generate_launch_description():
     return LaunchDescription([
         model_arg,
         is_sim_arg,
+        sim_controllers_config_arg,
         gazebo_resource_path,
         robot_state_publisher_node,
         gazebo,

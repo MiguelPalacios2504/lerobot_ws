@@ -20,6 +20,7 @@ def _launch_setup(context, *args, **kwargs):
         uart_port=LaunchConfiguration("uart_port").perform(context),
         is_sim=LaunchConfiguration("is_sim").perform(context),
         leader_only=LaunchConfiguration("leader_only").perform(context),
+        teleop_follower=LaunchConfiguration("teleop_follower").perform(context),
     )
 
 
@@ -32,6 +33,11 @@ def generate_launch_description():
             "leader_only",
             default_value="false",
             description="Solo joint_state_broadcaster (brazo líder en teleoperación)",
+        ),
+        DeclareLaunchArgument(
+            "teleop_follower",
+            default_value="false",
+            description="Follower de teleop: ForwardCommandController (hw o sim)",
         ),
         OpaqueFunction(function=_launch_setup),
     ])

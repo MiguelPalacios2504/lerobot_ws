@@ -1,10 +1,17 @@
 import os
+import sys
 
 from launch.actions import LogInfo, TimerAction
 from launch.substitutions import Command
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 from ament_index_python.packages import get_package_share_directory
+
+_LAUNCH_DIR = os.path.join(get_package_share_directory("lerobot_description"), "launch")
+if _LAUNCH_DIR not in sys.path:
+    sys.path.insert(0, _LAUNCH_DIR)
+
+from jazzy_compat import ignition_xacro_arg  # noqa: E402
 
 
 def _robot_namespace(ns: str):
@@ -35,7 +42,13 @@ def make_robot_stack(
     controllers_hw_path = os.path.join(pkg_ctrl, "config", "lerobot_controllers.yaml")
     controllers_teleop_path = os.path.join(pkg_ctrl, "config", "lerobot_controllers_teleop.yaml")
     controllers_sim_path = os.path.join(pkg_ctrl, "config", "lerobot_controllers_sim.yaml")
-    controllers_path = controllers_teleop_path if teleop_mode else controllers_hw_path
+    controllers_sim_teleop_path = os.path.join(
+        pkg_ctrl, "config", "lerobot_controllers_sim_teleop.yaml"
+    )
+    if use_sim:
+        controllers_path = controllers_sim_teleop_path if teleop_mode else controllers_sim_path
+    else:
+        controllers_path = controllers_teleop_path if teleop_mode else controllers_hw_path
     move_time_ms = "40" if teleop_mode else "300"
     command_deadband = "0.004" if teleop_mode else "0.002"
 
@@ -44,6 +57,7 @@ def make_robot_stack(
             "xacro ",
             os.path.join(pkg_desc, "urdf", "lerobot.urdf.xacro"),
             " is_sim:=", is_sim,
+            " is_ignition:=", ignition_xacro_arg(),
             " serial_port:=", uart_port,
             " passive_mode:=", "true" if leader_mode else "false",
             " move_time_ms:=", move_time_ms,
@@ -84,7 +98,7 @@ def make_robot_stack(
                     "--controller-manager", "/controller_manager",
                     "--controller-manager-timeout", "30",
                     "--switch-timeout", "30",
-                    "--param-file", controllers_sim_path,
+                    "--param-file", controllers_path,
                 ],
                 output="screen",
             )]),
@@ -96,7 +110,7 @@ def make_robot_stack(
                     "--controller-manager", "/controller_manager",
                     "--controller-manager-timeout", "30",
                     "--switch-timeout", "30",
-                    "--param-file", controllers_sim_path,
+                    "--param-file", controllers_path,
                 ],
                 output="screen",
             )]),

@@ -49,7 +49,7 @@ class MirrorNode(Node):
 
         self.sub = self.create_subscription(
             JointState,
-            f'/{self.source_ns}/joint_states',
+            self._ns_topic(self.source_ns, 'joint_states'),
             self._on_js,
             10,
         )
@@ -57,31 +57,37 @@ class MirrorNode(Node):
         if self.command_mode == 'forward':
             self.arm_pub = self.create_publisher(
                 Float64MultiArray,
-                f'/{self.target_ns}/{self.arm_controller}/commands',
+                self._ns_topic(self.target_ns, f'{self.arm_controller}/commands'),
                 10,
             )
             self.gripper_pub = self.create_publisher(
                 Float64MultiArray,
-                f'/{self.target_ns}/{self.gripper_controller}/commands',
+                self._ns_topic(self.target_ns, f'{self.gripper_controller}/commands'),
                 10,
             )
         else:
             self.arm_pub = self.create_publisher(
                 JointTrajectory,
-                f'/{self.target_ns}/{self.arm_controller}/joint_trajectory',
+                self._ns_topic(self.target_ns, f'{self.arm_controller}/joint_trajectory'),
                 10,
             )
             self.gripper_pub = self.create_publisher(
                 JointTrajectory,
-                f'/{self.target_ns}/{self.gripper_controller}/joint_trajectory',
+                self._ns_topic(self.target_ns, f'{self.gripper_controller}/joint_trajectory'),
                 10,
             )
 
         self.get_logger().info(
             f'Teleop directo [{self.command_mode}]: '
-            f'/{self.source_ns}/joint_states -> /{self.target_ns}/{{arm,gripper}} '
+            f'{self._ns_topic(self.source_ns, "joint_states")} -> '
+            f'{self._ns_topic(self.target_ns, "{arm,gripper}")} '
             f'(deadband={self.publish_deadband:.4f} rad)'
         )
+
+    @staticmethod
+    def _ns_topic(ns: str, suffix: str) -> str:
+        ns = ns.strip('/')
+        return f'/{ns}/{suffix}' if ns else f'/{suffix}'
 
     @staticmethod
     def _smooth(prev, raw, alpha):

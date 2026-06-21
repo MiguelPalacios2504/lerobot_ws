@@ -13,6 +13,9 @@
   <exec_depend>rviz2</exec_depend>
   <exec_depend>moveit_configs_utils</exec_depend>
   <exec_depend>moveit_ros_move_group</exec_depend>
+  <exec_depend>moveit_ros_visualization</exec_depend>
+  <exec_depend>moveit_planners_ompl</exec_depend>
+  <exec_depend>pilz_industrial_motion_planner</exec_depend>
   <exec_depend>lerobot_description</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>

@@ -7,7 +7,6 @@
         <joint name="limb3_to_limb2"/>
         <joint name="limb4_to_limb3"/>
         <joint name="limb5_to_limb4"/>
-        
     </group>
     <group name="gripper">
         <joint name="limb6_to_limb5"/>

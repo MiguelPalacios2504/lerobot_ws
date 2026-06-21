@@ -7,7 +7,8 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <sys/ioctl.h>
-#include <errno.h>
+#include <cerrno>
+#include <cstring>
 #include <algorithm>
 
 namespace feetech {
@@ -38,7 +39,11 @@ public:
   void open(const std::string& port, int baud = 1000000) {
     close();
     fd_ = ::open(port.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
-    if (fd_ < 0) throw std::runtime_error("No se pudo abrir puerto " + port);
+    if (fd_ < 0) {
+      throw std::runtime_error(
+        "No se pudo abrir puerto " + port + ": " + std::strerror(errno) +
+        " (¿grupo dialout? ejecuta: sudo usermod -aG dialout $USER y cierra sesión)");
+    }
     termios tio{};
     tcgetattr(fd_, &tio);
     cfmakeraw(&tio);

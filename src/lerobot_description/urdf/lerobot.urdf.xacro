@@ -7,7 +7,8 @@
     <xacro:arg name="move_time_ms" default="300"/>
     <xacro:arg name="command_deadband" default="0.002"/>
 
-    <xacro:arg name="is_ignition" default="true"/>
+    <xacro:arg name="is_ignition" default="false"/>
+    <xacro:arg name="sim_controllers_config" default="lerobot_controllers_sim.yaml"/>
     <xacro:include filename="$(find lerobot_description)/urdf/lerobot_gazebo.xacro"/>
     <xacro:include filename="$(find lerobot_description)/urdf/lerobot_ros2_control.xacro"/>
     <xacro:include filename="materials.xacro"/>
@@ -166,8 +167,6 @@
             </geometry>
         </collision>
     </link>
-
-
 
     <joint name="base_joint" type="fixed">
         <parent link="world"/>

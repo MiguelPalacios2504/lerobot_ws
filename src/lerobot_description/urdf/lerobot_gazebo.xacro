@@ -4,13 +4,13 @@
     <gazebo>
         <xacro:if value="$(arg is_ignition)">
             <plugin filename="ign_ros2_control-system" name="ign_ros2_control::IgnitionROS2ControlPlugin">
-                <parameters>$(find lerobot_controller)/config/lerobot_controllers_sim.yaml</parameters>
+                <parameters>$(find lerobot_controller)/config/$(arg sim_controllers_config)</parameters>
             </plugin>
         </xacro:if>
 
         <xacro:unless value="$(arg is_ignition)">
             <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
-                <parameters>$(find lerobot_controller)/config/lerobot_controllers_sim.yaml</parameters>
+                <parameters>$(find lerobot_controller)/config/$(arg sim_controllers_config)</parameters>
             </plugin>
         </xacro:unless>
     </gazebo>
