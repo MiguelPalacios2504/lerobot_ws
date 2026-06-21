@@ -35,6 +35,8 @@ private:
   int baud_ = 1000000;
   std::vector<uint8_t> ids_ {1,2,3,4,5,6};
   uint16_t move_time_ms_ = 200;
+  bool passive_mode_ = false;
+  double command_deadband_ = 0.003;
 
   double scale_ = 4096.0 / (2.0 * M_PI);
   std::vector<int> offsets_raw_;
@@ -54,7 +56,7 @@ private:
 
   std::vector<std::deque<double>> pos_history_;
   std::vector<double> pos_filtered_;
-  const size_t pos_filter_window_ = 15;
+  const size_t pos_filter_window_ = 2;
   const double pos_deadband_ = 0.0005;
 
   // utilidades

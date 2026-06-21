@@ -2,59 +2,33 @@
 <robot name="lerobot" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
     <xacro:property name="PI" value="3.14159"/>
-    <xacro:property name="effort" value="30.0"/> 
-    <xacro:property name="velocity" value="10.0"/>  
+    <xacro:property name="effort" value="30.0"/>
+    <xacro:property name="velocity" value="10.0"/>
 
     <ros2_control type="system" name="RobotSystem">
 
-
         <xacro:if value="$(arg is_sim)">
-            <xacro:if value="$(arg is_ignition)">
-                <hardware>
-                <plugin>gz_ros2_control/GazeboSimSystem</plugin>
-
-                <!-- Habilita reloj de simulación -->
-                <param name="use_sim_time">true</param>
-
-                <!-- Carga de controladores -->
-                <plugin>gz_ros2_control/GazeboSimROS2ControlPlugin</plugin>
-                <param name="controller_manager_config_file">
-                    $(find lerobot_controller)/config/lerobot_controllers.yaml
-                </param>
-
-                </hardware>
-            </xacro:if>
-
-            <xacro:unless value="$(arg is_ignition)">
-                <hardware>
-                <plugin>gz_ros2_control/GazeboSimSystem</plugin>
-                <param name="use_sim_time">true</param>
-
-                <plugin>gz_ros2_control/GazeboSimROS2ControlPlugin</plugin>
-                <param name="controller_manager_config_file">
-                    $(find lerobot_controller)/config/lerobot_controllers.yaml
-                </param>
-                </hardware>
-            </xacro:unless>
+            <hardware>
+                <xacro:if value="$(arg is_ignition)">
+                    <plugin>ign_ros2_control/IgnitionSystem</plugin>
+                </xacro:if>
+                <xacro:unless value="$(arg is_ignition)">
+                    <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+                </xacro:unless>
+            </hardware>
         </xacro:if>
-
-
-
 
         <xacro:unless value="$(arg is_sim)">
             <hardware>
                 <plugin>lerobot_controller/LerobotInterface</plugin>
-                <!-- Puerto UART del adaptador Waveshare Bus Servo -->
-                <param name="port">/dev/ttyACM0</param>
-                <!-- Velocidad del bus serial -->
+                <param name="port">$(arg serial_port)</param>
                 <param name="baud">1000000</param>
-                <!-- Tiempo de movimiento por comando (en milisegundos) -->
-                <param name="move_time_ms">200</param>
-                <!-- IDs de los servos físicos conectados -->
+                <param name="move_time_ms">$(arg move_time_ms)</param>
+                <param name="passive_mode">$(arg passive_mode)</param>
+                <param name="command_deadband">$(arg command_deadband)</param>
                 <param name="ids">1,2,3,4,5,6</param>
             </hardware>
         </xacro:unless>
-
 
         <joint name="limb1_to_base_link">
             <command_interface name="position">

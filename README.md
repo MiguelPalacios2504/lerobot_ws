@@ -77,7 +77,7 @@ ros2 launch lerobot_description displaz.launch.py is_sim:=true
 
 ### Simulation with Gazebo
 ```bash
-ros2 launch lerobot_description gazebo.launch.py
+ros2 launch lerobot_description gazebo.launch.py is_sim:=true
 ros2 launch lerobot_controller controller.launch.py is_sim:=true mode:=moveit
 ```
 test movement
@@ -99,7 +99,7 @@ test movement
 
 ```bash
 ros2 launch lerobot_description gazebo.launch.py
-ros2 launch lerobot_controller controller.launch.py is_sim:=true mode:=moveit
+ros2 launch lerobot_controller controller.launch.py is_sim:=true
 ros2 launch lerobot_description rviz.launch.py is_sim:=true
 ```
 
@@ -111,7 +111,7 @@ ros2 launch lerobot_description rviz.launch.py is_sim:=true
 For running the **real robot** (connected via `/dev/ttyACM0`, baudrate `1000000`):
 
 ```bash
-ros2 launch lerobot_controller controller.launch.py sim:=False
+ros2 launch lerobot_controller controller.launch.py is_sim:=false
 ```
 <p align="center">
   <img src="images/rviz_real.png" alt="LeRobot real with rviz" width="600"/>
@@ -123,6 +123,7 @@ ros2 launch lerobot_controller controller.launch.py sim:=False
 **Real robot:** it depends in which mode you would like to work is_sim:true (simulation) is_sim: false (real robot)
 ```bash
 ros2 launch lerobot_moveit moveit.launch.py
+ros2 launch lerobot_moveit moveit.launch.py is_sim:=true
 ```
 <p align="center">
   <img src="images/moveit.png" alt="LeRobot with moveit" width="600"/>

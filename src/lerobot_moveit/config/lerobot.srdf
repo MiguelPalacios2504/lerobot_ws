@@ -13,6 +13,9 @@
         <joint name="limb6_to_limb5"/>
     </group>
 
+    <!-- Tip del brazo para el marcador interactivo de MoveIt -->
+    <end_effector name="eef" parent_link="limb5_1" group="gripper" parent_group="arm"/>
+
     <group_state name="home" group="arm">
         <joint name="limb1_to_base_link" value="0"/>
         <joint name="limb2_to_limb1" value="0"/>

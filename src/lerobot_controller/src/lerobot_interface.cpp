@@ -16,6 +16,10 @@ CallbackReturn LerobotInterface::on_init(const hardware_interface::HardwareInfo 
     if (info_.hardware_parameters.count("baud")) baud_ = std::stoi(info_.hardware_parameters.at("baud"));
     if (info_.hardware_parameters.count("move_time_ms"))
       move_time_ms_ = static_cast<uint16_t>(std::stoi(info_.hardware_parameters.at("move_time_ms")));
+    if (info_.hardware_parameters.count("passive_mode"))
+      passive_mode_ = (info_.hardware_parameters.at("passive_mode") == "true");
+    if (info_.hardware_parameters.count("command_deadband"))
+      command_deadband_ = std::stod(info_.hardware_parameters.at("command_deadband"));
   } catch (...) {
     RCLCPP_ERROR(rclcpp::get_logger("LerobotInterface"), "Error leyendo parámetros de hardware");
     return CallbackReturn::FAILURE;
@@ -88,6 +92,14 @@ CallbackReturn LerobotInterface::on_activate(const rclcpp_lifecycle::State &)
       }
     }
     prev_position_commands_ = position_commands_;
+
+    if (passive_mode_) {
+      for (uint8_t id : ids_) {
+        bus_.setTorqueEnable(id, false);
+      }
+      RCLCPP_INFO(rclcpp::get_logger("LerobotInterface"),
+                  "Modo pasivo: torque desactivado (brazo líder).");
+    }
   } catch (const std::exception &e) {
     RCLCPP_WARN(rclcpp::get_logger("LerobotInterface"),
                 "Lectura inicial falló: %s", e.what());
@@ -101,6 +113,16 @@ CallbackReturn LerobotInterface::on_activate(const rclcpp_lifecycle::State &)
 
 CallbackReturn LerobotInterface::on_deactivate(const rclcpp_lifecycle::State &)
 {
+  if (passive_mode_) {
+    try {
+      for (uint8_t id : ids_) {
+        bus_.setTorqueEnable(id, true);
+      }
+    } catch (const std::exception &e) {
+      RCLCPP_WARN(rclcpp::get_logger("LerobotInterface"),
+                  "No se pudo reactivar torque: %s", e.what());
+    }
+  }
   bus_.close();
   RCLCPP_INFO(rclcpp::get_logger("LerobotInterface"), "Bus cerrado.");
   return CallbackReturn::SUCCESS;
@@ -182,18 +204,19 @@ hardware_interface::return_type LerobotInterface::read(const rclcpp::Time &, con
 
 hardware_interface::return_type LerobotInterface::write(const rclcpp::Time &, const rclcpp::Duration &)
 {
-  bool changed = false;
-  for (size_t i = 0; i < position_commands_.size(); ++i)
-    if (position_commands_[i] != prev_position_commands_[i]) { changed = true; break; }
-
-  if (!changed) return hardware_interface::return_type::OK;
+  if (passive_mode_) {
+    return hardware_interface::return_type::OK;
+  }
 
   try {
     for (size_t i = 0; i < info_.joints.size(); ++i) {
+      if (std::fabs(position_commands_[i] - prev_position_commands_[i]) <= command_deadband_) {
+        continue;
+      }
       uint16_t raw = rad_to_raw(i, position_commands_[i]);
       bus_.writeGoalPositionTime(ids_[i], raw, move_time_ms_, 0);
+      prev_position_commands_[i] = position_commands_[i];
     }
-    prev_position_commands_ = position_commands_;
   } catch (const std::exception& e) {
     RCLCPP_ERROR(rclcpp::get_logger("LerobotInterface"),
                  "Error escribiendo servos: %s", e.what());

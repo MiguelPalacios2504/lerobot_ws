@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>lerobot_teleoperation</name>
+  <version>0.1.0</version>
+  <description>Teleoperation: mirror joint states from a source robot to a target robot controller.</description>
+
+  <maintainer email="a20203884@pucp.edu.pe">mi</maintainer>
+  <license>Apache-2.0</license>
+
+  <exec_depend>ros2launch</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <buildtool_depend>ament_python</buildtool_depend>
+
+  <depend>rclpy</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>trajectory_msgs</depend>
+  <depend>launch</depend>
+  <depend>launch_ros</depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

@@ -17,12 +17,18 @@ def generate_launch_description():
     model_arg = DeclareLaunchArgument(
         "model",
         default_value=os.path.join(pkg_desc, "urdf", "lerobot.urdf.xacro"),
-        description="Path to the robot URDF/Xacro file"
+        description="Path to the robot URDF/Xacro file",
+    )
+
+    is_sim_arg = DeclareLaunchArgument(
+        "is_sim",
+        default_value="true",
+        description="Must be true for Gazebo simulation",
     )
 
     gazebo_resource_path = SetEnvironmentVariable(
         name="GZ_SIM_RESOURCE_PATH",
-        value=[str(Path(pkg_desc).parent.resolve())]
+        value=[str(Path(pkg_desc).parent.resolve())],
     )
 
     ros_distro = os.environ.get("ROS_DISTRO", "humble")
@@ -30,8 +36,13 @@ def generate_launch_description():
     physics_engine = "" if ros_distro == "humble" else "--physics-engine gz-physics-bullet-featherstone-plugin"
 
     robot_description = ParameterValue(
-        Command(["xacro ", LaunchConfiguration("model"), " is_ignition:=", is_ignition]),
-        value_type=str
+        Command([
+            "xacro ",
+            LaunchConfiguration("model"),
+            " is_sim:=", LaunchConfiguration("is_sim"),
+            " is_ignition:=", is_ignition,
+        ]),
+        value_type=str,
     )
 
     robot_state_publisher_node = Node(
@@ -39,7 +50,7 @@ def generate_launch_description():
         executable="robot_state_publisher",
         parameters=[{
             "robot_description": robot_description,
-            "use_sim_time": True
+            "use_sim_time": True,
         }],
         output="screen",
     )
@@ -63,12 +74,13 @@ def generate_launch_description():
         executable="parameter_bridge",
         output="screen",
         arguments=[
-            "/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock]"  # ← corregido
+            "/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock]",
         ],
     )
 
     return LaunchDescription([
         model_arg,
+        is_sim_arg,
         gazebo_resource_path,
         robot_state_publisher_node,
         gazebo,

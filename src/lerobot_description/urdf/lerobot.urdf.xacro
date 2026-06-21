@@ -2,6 +2,10 @@
 <robot name="lerobot" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
     <xacro:arg name="is_sim" default="true"/>
+    <xacro:arg name="serial_port" default="/dev/ttyACM0"/>
+    <xacro:arg name="passive_mode" default="false"/>
+    <xacro:arg name="move_time_ms" default="300"/>
+    <xacro:arg name="command_deadband" default="0.002"/>
 
     <xacro:arg name="is_ignition" default="true"/>
     <xacro:include filename="$(find lerobot_description)/urdf/lerobot_gazebo.xacro"/>

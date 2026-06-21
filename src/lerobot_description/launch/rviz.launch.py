@@ -27,9 +27,17 @@ def generate_launch_description():
 
     is_sim = LaunchConfiguration("is_sim")
 
+    ros_distro = os.environ.get("ROS_DISTRO", "humble")
+    is_ignition = "true" if ros_distro == "humble" else "false"
+
     robot_description = ParameterValue(
-        Command(["xacro ", LaunchConfiguration("model")]),
-        value_type=str
+        Command([
+            "xacro ",
+            LaunchConfiguration("model"),
+            " is_sim:=", is_sim,
+            " is_ignition:=", is_ignition,
+        ]),
+        value_type=str,
     )
 
     robot_state_publisher = Node(
@@ -38,8 +46,9 @@ def generate_launch_description():
         output="screen",
         parameters=[
             {"robot_description": robot_description},
-            {"use_sim_time": True}
+            {"use_sim_time": True},
         ],
+        condition=IfCondition("false"),  # use robot_state_publisher from gazebo.launch.py
     )
 
     rviz_config_path = os.path.join(

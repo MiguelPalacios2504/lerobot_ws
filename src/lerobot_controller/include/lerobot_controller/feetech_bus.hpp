@@ -19,6 +19,7 @@ static constexpr uint8_t HDR = 0xFF;
 // Direcciones ST3215
 static constexpr uint8_t ADDR_GOAL_POS      = 0x2A;
 static constexpr uint8_t ADDR_MOVE_TIME     = 0x2C;
+static constexpr uint8_t ADDR_TORQUE_ENABLE = 0x28;
 static constexpr uint8_t ADDR_PRESENT_POS   = 0x38;
 static constexpr uint8_t ADDR_PRESENT_SPEED = 0x3A;
 static constexpr uint8_t ADDR_PRESENT_LOAD  = 0x3C;
@@ -88,6 +89,10 @@ public:
       }
     }
     return states;
+  }
+
+  void setTorqueEnable(uint8_t id, bool enable) {
+    writeRegs(id, ADDR_TORQUE_ENABLE, {static_cast<uint8_t>(enable ? 1 : 0)});
   }
 
   void writeGoalPositionTime(uint8_t id, uint16_t pos, uint16_t time_ms, uint16_t speed = 0) {
