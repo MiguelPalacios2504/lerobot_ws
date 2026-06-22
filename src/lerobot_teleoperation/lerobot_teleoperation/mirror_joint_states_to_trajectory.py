@@ -4,6 +4,7 @@ Teleop baja latencia: reenvía posiciones del líder al follower en cada joint_s
 Modo forward_command (sin joint_trajectory_controller) para respuesta inmediata.
 """
 import rclpy
+from rcl_interfaces.msg import ParameterDescriptor
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64MultiArray
@@ -30,6 +31,13 @@ class MirrorNode(Node):
             'limb5_to_limb4',
         ])
         self.declare_parameter('gripper_joints', ['limb6_to_limb5'])
+        self.declare_parameter(
+            'joint_name_prefix',
+            '',
+            ParameterDescriptor(
+                description='Prepended to source joint names for follower trajectories (e.g. lerobot_).',
+            ),
+        )
 
         self.source_ns = self.get_parameter('source_ns').get_parameter_value().string_value.strip('/')
         self.target_ns = self.get_parameter('target_ns').get_parameter_value().string_value.strip('/')
@@ -41,6 +49,13 @@ class MirrorNode(Node):
         self.trajectory_duration = float(self.get_parameter('trajectory_duration').value)
         self.arm_joints = list(self.get_parameter('arm_joints').value)
         self.gripper_joints = list(self.get_parameter('gripper_joints').value)
+        joint_prefix = self.get_parameter('joint_name_prefix').get_parameter_value().string_value
+        if joint_prefix:
+            self.target_arm_joints = [f'{joint_prefix}{j}' for j in self.arm_joints]
+            self.target_gripper_joints = [f'{joint_prefix}{j}' for j in self.gripper_joints]
+        else:
+            self.target_arm_joints = self.arm_joints
+            self.target_gripper_joints = self.gripper_joints
 
         self._smooth_arm = None
         self._smooth_gripper = None
@@ -144,11 +159,23 @@ class MirrorNode(Node):
 
         if all(j in name_to_pos for j in self.arm_joints):
             raw = [name_to_pos[j] for j in self.arm_joints]
-            self._maybe_send(self.arm_pub, self.arm_joints, raw, '_smooth_arm', '_sent_arm')
+            self._maybe_send(
+                self.arm_pub,
+                self.target_arm_joints,
+                raw,
+                '_smooth_arm',
+                '_sent_arm',
+            )
 
         if all(j in name_to_pos for j in self.gripper_joints):
             raw = [name_to_pos[j] for j in self.gripper_joints]
-            self._maybe_send(self.gripper_pub, self.gripper_joints, raw, '_smooth_gripper', '_sent_gripper')
+            self._maybe_send(
+                self.gripper_pub,
+                self.target_gripper_joints,
+                raw,
+                '_smooth_gripper',
+                '_sent_gripper',
+            )
 
 
 def main():

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="lerobot_ros2_control_joints" params="prefix:=lerobot_">
+    <xacro:property name="PI" value="3.14159"/>
+
+    <joint name="${prefix}limb1_to_base_link">
+      <command_interface name="position">
+        <param name="min">-${25*PI/180}</param>
+        <param name="max">${25*PI/180}</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="${prefix}limb2_to_limb1">
+      <command_interface name="position">
+        <param name="min">-${200*PI/180}</param>
+        <param name="max">${35*PI/180}</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="${prefix}limb3_to_limb2">
+      <command_interface name="position">
+        <param name="min">-${20*PI/180}</param>
+        <param name="max">${160*PI/180}</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="${prefix}limb4_to_limb3">
+      <command_interface name="position">
+        <param name="min">-${PI / 2}</param>
+        <param name="max">${PI / 2}</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="${prefix}limb5_to_limb4">
+      <command_interface name="position">
+        <param name="min">-${150*PI/180}</param>
+        <param name="max">${150*PI/180}</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="${prefix}limb6_to_limb5">
+      <command_interface name="position">
+        <param name="min">-${100*PI/180}</param>
+        <param name="max">${10*PI/180}</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </xacro:macro>
+</robot>

@@ -12,6 +12,7 @@ setup(
         ('share/' + package_name + '/launch', [
             'launch/teleop_mirror.launch.py',
             'launch/dual_robot_teleop.launch.py',
+            'launch/outdoor_hw_to_sim_mirror.launch.py',
         ]),
         ('share/' + package_name + '/rviz', ['rviz/teleop_dual.rviz']),
     ],
