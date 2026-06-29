@@ -19,7 +19,12 @@ def generate_launch_description():
     target_ns_arg = DeclareLaunchArgument(
         'target_ns',
         default_value='follower',
-        description='Namespace del follower. Usa "/" para sim/Gazebo sin namespace (topics en /arm_controller/...)',
+        description='Namespace del follower. Usa "/" para sin namespace (topics en /arm_controller/...).',
+    )
+    source_topic_arg = DeclareLaunchArgument(
+        'source_joint_states_topic',
+        default_value='',
+        description='Topic absoluto del leader (ej. /teleop/joint_states para twin remoto).',
     )
     mode_arg = DeclareLaunchArgument('command_mode', default_value='forward')
     deadband_arg = DeclareLaunchArgument('publish_deadband', default_value='0.004')
@@ -33,6 +38,7 @@ def generate_launch_description():
         parameters=[{
             'source_ns': LaunchConfiguration('source_ns'),
             'target_ns': LaunchConfiguration('target_ns'),
+            'source_joint_states_topic': LaunchConfiguration('source_joint_states_topic'),
             'command_mode': LaunchConfiguration('command_mode'),
             'publish_deadband': LaunchConfiguration('publish_deadband'),
             'smoothing_alpha': LaunchConfiguration('smoothing_alpha'),
@@ -44,6 +50,7 @@ def generate_launch_description():
     return LaunchDescription([
         source_ns_arg,
         target_ns_arg,
+        source_topic_arg,
         mode_arg,
         deadband_arg,
         alpha_arg,

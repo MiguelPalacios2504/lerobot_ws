@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  Raspberry (follower) -> Laptop (leader + relay).
+  Edita la IP del peer con la IP de tu laptop en la LAN (ej. 10.42.0.1).
+
+  Uso:
+    export CYCLONEDDS_URI=file:///ruta/a/cyclonedds_pi.xml
+-->
+<CycloneDDS xmlns="https://cdds.io/config">
+  <Domain>
+    <General>
+      <NetworkInterfaceAddress>auto</NetworkInterfaceAddress>
+      <AllowMulticast>false</AllowMulticast>
+    </General>
+    <Discovery>
+      <Peers>
+        <Peer address="10.42.0.1"/>
+      </Peers>
+      <ParticipantIndex>auto</ParticipantIndex>
+    </Discovery>
+  </Domain>
+</CycloneDDS>

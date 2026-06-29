@@ -32,6 +32,14 @@ class MirrorNode(Node):
         ])
         self.declare_parameter('gripper_joints', ['limb6_to_limb5'])
         self.declare_parameter(
+            'source_joint_states_topic',
+            '',
+            ParameterDescriptor(
+                description='Topic absoluto de joint_states del leader. '
+                            'Si está vacío, usa /<source_ns>/joint_states.',
+            ),
+        )
+        self.declare_parameter(
             'joint_name_prefix',
             '',
             ParameterDescriptor(
@@ -57,6 +65,17 @@ class MirrorNode(Node):
             self.target_arm_joints = self.arm_joints
             self.target_gripper_joints = self.gripper_joints
 
+        source_topic = (
+            self.get_parameter('source_joint_states_topic')
+            .get_parameter_value().string_value.strip()
+        )
+        if source_topic:
+            self._source_topic = (
+                source_topic if source_topic.startswith('/') else f'/{source_topic}'
+            )
+        else:
+            self._source_topic = self._ns_topic(self.source_ns, 'joint_states')
+
         self._smooth_arm = None
         self._smooth_gripper = None
         self._sent_arm = None
@@ -64,7 +83,7 @@ class MirrorNode(Node):
 
         self.sub = self.create_subscription(
             JointState,
-            self._ns_topic(self.source_ns, 'joint_states'),
+            self._source_topic,
             self._on_js,
             10,
         )
@@ -94,7 +113,7 @@ class MirrorNode(Node):
 
         self.get_logger().info(
             f'Teleop directo [{self.command_mode}]: '
-            f'{self._ns_topic(self.source_ns, "joint_states")} -> '
+            f'{self._source_topic} -> '
             f'{self._ns_topic(self.target_ns, "{arm,gripper}")} '
             f'(deadband={self.publish_deadband:.4f} rad)'
         )
