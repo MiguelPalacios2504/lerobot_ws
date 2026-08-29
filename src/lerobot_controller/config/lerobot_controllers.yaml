@@ -37,3 +37,13 @@
     constraints:
       stopped_velocity_tolerance: 0.01
       goal_time: 2.0
+
+/**/joint_state_broadcaster:
+  ros__parameters:
+    joints:
+      - limb1_to_base_link
+      - limb2_to_limb1
+      - limb3_to_limb2
+      - limb4_to_limb3
+      - limb5_to_limb4
+      - limb6_to_limb5

@@ -41,13 +41,15 @@ pluginlib_export_plugin_description_file(hardware_interface lerobot_controller.x
 
 
 add_executable(gui_to_controller_bridge src/gui_to_controller_bridge.cpp)
+add_executable(feetech_torque_echo scripts/feetech_torque_echo.cpp)
+target_include_directories(feetech_torque_echo PRIVATE include)
 ament_target_dependencies(gui_to_controller_bridge
   rclcpp
   sensor_msgs
   trajectory_msgs
 )
 
-install(TARGETS ${PROJECT_NAME} gui_to_controller_bridge
+install(TARGETS ${PROJECT_NAME} gui_to_controller_bridge feetech_torque_echo
   DESTINATION lib/${PROJECT_NAME})
 
 install(
@@ -65,6 +67,14 @@ install(
   DIRECTORY config launch
   DESTINATION share/${PROJECT_NAME}
 )
+
+set(LEROBOT_DDS_CONFIG "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/config/fastdds_no_shm.xml")
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/env-hooks/lerobot_dds.sh.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/env-hooks/lerobot_dds.sh"
+  @ONLY
+)
+ament_environment_hooks("${CMAKE_CURRENT_BINARY_DIR}/env-hooks/lerobot_dds.sh")
 
 ament_export_include_directories(
   include

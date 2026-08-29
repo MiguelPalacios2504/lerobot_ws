@@ -20,6 +20,8 @@ CallbackReturn LerobotInterface::on_init(const hardware_interface::HardwareInfo 
       passive_mode_ = (info_.hardware_parameters.at("passive_mode") == "true");
     if (info_.hardware_parameters.count("command_deadband"))
       command_deadband_ = std::stod(info_.hardware_parameters.at("command_deadband"));
+    if (info_.hardware_parameters.count("max_effort_nm"))
+      max_effort_nm_ = std::stod(info_.hardware_parameters.at("max_effort_nm"));
   } catch (...) {
     RCLCPP_ERROR(rclcpp::get_logger("LerobotInterface"), "Error leyendo parámetros de hardware");
     return CallbackReturn::FAILURE;
@@ -37,14 +39,14 @@ CallbackReturn LerobotInterface::on_init(const hardware_interface::HardwareInfo 
   pos_filtered_.assign(n, 0.0);
 
 
-  // Calibración por servo (documentado)
+  // Calibración por servo (ticks Feetech @ pose 0°). ID1 sin cambios (2026-08).
   offsets_raw_ = {
-    2301 - 122,   // 2179
-    2586 + 1008,  // 3594
-    345,
-    2286 + 68,    // 2354
-    2064 + 101,   // 2165
-    2275
+    2179,  // ID1
+    936,   // ID2 @ 0°
+    3061,  // ID3 @ 0°
+    2067,  // ID4 @ 0°
+    2055,  // ID5 @ 0°
+    2160,  // ID6 @ 0°
   };
   signs_ = {-1, -1, -1, -1, -1, -1};
   scale_ = 4096.0 / (2.0 * M_PI);
@@ -87,7 +89,9 @@ CallbackReturn LerobotInterface::on_activate(const rclcpp_lifecycle::State &)
     auto states = bus_.readAll(ids_);
     for (size_t i = 0; i < info_.joints.size(); ++i) {
       if (i < states.size()) {
-        position_states_[i]  = raw_to_rad(i, states[i].pos);
+        const double internal = raw_to_rad(i, states[i].pos);
+        pos_filtered_[i] = internal;
+        position_states_[i] = to_urdf_angle(static_cast<int>(i), internal);
         position_commands_[i] = position_states_[i];
       }
     }
@@ -136,7 +140,7 @@ hardware_interface::return_type LerobotInterface::read(const rclcpp::Time &, con
     // 🔧 Conversión a unidades físicas
     const double TICKS_TO_RAD = (2.0 * M_PI / 4096.0);
     const double SPEED_SCALE  = TICKS_TO_RAD * 10.0;   // ticks/0.1s → rad/s
-    const double TORQUE_SCALE = 1.0 / 1000.0;          // raw→Nm
+    constexpr double LOAD_FULL_SCALE = 1000.0;       // ±1000 = 100% torque ST3215
 
     for (size_t i = 0; i < states.size(); ++i) {
       // --- POSICIÓN ---
@@ -157,7 +161,7 @@ hardware_interface::return_type LerobotInterface::read(const rclcpp::Time &, con
         p_avg = pos_filtered_[i];
 
       pos_filtered_[i] = p_avg;
-      position_states_[i] = pos_filtered_[i];
+      position_states_[i] = to_urdf_angle(static_cast<int>(i), pos_filtered_[i]);
 
 
       int16_t raw_vel = std::clamp<int16_t>(states[i].vel, 0, 2047);
@@ -184,11 +188,11 @@ hardware_interface::return_type LerobotInterface::read(const rclcpp::Time &, con
       // Zona muerta (deadband) para eliminar ruido residual
       if (std::fabs(filtered) < vel_deadband_) filtered = 0.0;
 
-      velocity_states_[i] = filtered;
+      velocity_states_[i] = to_urdf_angle(static_cast<int>(i), filtered);
 
-      // --- TORQUE ---
-      double torque_value = static_cast<double>(states[i].load) * TORQUE_SCALE;
-      effort_states_[i] = torque_value;
+      // --- TORQUE (Present Load → Nm aproximado) ---
+      const double load_norm = static_cast<double>(states[i].load) / LOAD_FULL_SCALE;
+      effort_states_[i] = load_norm * max_effort_nm_;
     }
 
   } catch (const std::exception &e) {
@@ -213,7 +217,7 @@ hardware_interface::return_type LerobotInterface::write(const rclcpp::Time &, co
       if (std::fabs(position_commands_[i] - prev_position_commands_[i]) <= command_deadband_) {
         continue;
       }
-      uint16_t raw = rad_to_raw(i, position_commands_[i]);
+      uint16_t raw = rad_to_raw(i, from_urdf_angle(static_cast<int>(i), position_commands_[i]));
       bus_.writeGoalPositionTime(ids_[i], raw, move_time_ms_, 0);
       prev_position_commands_[i] = position_commands_[i];
     }
@@ -236,6 +240,16 @@ uint16_t LerobotInterface::rad_to_raw(int i, double rad) const {
 double LerobotInterface::raw_to_rad(int i, uint16_t raw) const {
   int centered = static_cast<int>(raw) - offsets_raw_[i];
   return static_cast<double>(signs_[i]) * (centered / scale_);
+}
+
+double LerobotInterface::to_urdf_angle(int i, double rad) const {
+  if (i >= 1 && i <= 4) return -rad;
+  return rad;
+}
+
+double LerobotInterface::from_urdf_angle(int i, double rad) const {
+  if (i >= 1 && i <= 4) return -rad;
+  return rad;
 }
 
 } // namespace lerobot_controller

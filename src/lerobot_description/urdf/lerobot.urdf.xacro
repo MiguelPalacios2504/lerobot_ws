@@ -8,6 +8,7 @@
     <xacro:arg name="command_deadband" default="0.002"/>
 
     <xacro:arg name="is_ignition" default="true"/>
+    <xacro:arg name="invert_joint_sign" default="false"/>
     <xacro:include filename="$(find lerobot_description)/urdf/lerobot_gazebo.xacro"/>
     <xacro:include filename="$(find lerobot_description)/urdf/lerobot_ros2_control.xacro"/>
     <xacro:include filename="materials.xacro"/>
@@ -17,6 +18,50 @@
     <xacro:property name="ZERO" value="0.0"/>
     <xacro:property name="effort" value="30.0"/> 
     <xacro:property name="velocity" value="10.0"/>  
+
+    <!-- Pose cero física (rad en URDF previo al ajuste): medida con joints_gui + robot real -->
+    <xacro:property name="home_l1" value="0"/>
+    <xacro:property name="home_l2" value="${PI}"/>
+    <xacro:property name="home_l3" value="-3.107"/>
+    <xacro:property name="home_l4" value="0"/>
+    <xacro:property name="home_l5" value="0"/>
+    <xacro:property name="home_l6" value="0"/>
+
+    <!-- Límites originales (deg) antes del cambio de offset Feetech -->
+    <xacro:property name="orig_l1_lo" value="-125"/>
+    <xacro:property name="orig_l1_hi" value="125"/>
+    <xacro:property name="orig_l2_lo" value="-35"/>
+    <xacro:property name="orig_l2_hi" value="200"/>
+    <xacro:property name="orig_l3_lo" value="-181"/>
+    <xacro:property name="orig_l3_hi" value="20"/>
+    <xacro:property name="orig_l4_lo" value="-90"/>
+    <xacro:property name="orig_l4_hi" value="90"/>
+    <xacro:property name="orig_l5_lo" value="-150"/>
+    <xacro:property name="orig_l5_hi" value="150"/>
+    <xacro:property name="orig_l6_lo" value="-100"/>
+    <xacro:property name="orig_l6_hi" value="10"/>
+
+    <!-- Límites re-expresados: nuevo = original - home (deg) -->
+    <xacro:property name="lim_l1_lo" value="${orig_l1_lo - home_l1 * 180 / PI}"/>
+    <xacro:property name="lim_l1_hi" value="${orig_l1_hi - home_l1 * 180 / PI}"/>
+    <xacro:property name="lim_l2_lo" value="${orig_l2_lo - home_l2 * 180 / PI}"/>
+    <xacro:property name="lim_l2_hi" value="${orig_l2_hi - home_l2 * 180 / PI}"/>
+    <xacro:property name="lim_l3_lo" value="${orig_l3_lo - home_l3 * 180 / PI}"/>
+    <xacro:property name="lim_l3_hi" value="${orig_l3_hi - home_l3 * 180 / PI}"/>
+    <xacro:property name="lim_l4_lo" value="${orig_l4_lo - home_l4 * 180 / PI}"/>
+    <xacro:property name="lim_l4_hi" value="${orig_l4_hi - home_l4 * 180 / PI}"/>
+    <xacro:property name="lim_l5_lo" value="${orig_l5_lo - home_l5 * 180 / PI}"/>
+    <xacro:property name="lim_l5_hi" value="${orig_l5_hi - home_l5 * 180 / PI}"/>
+    <xacro:property name="lim_l6_lo" value="${orig_l6_lo - home_l6 * 180 / PI}"/>
+    <xacro:property name="lim_l6_hi" value="${orig_l6_hi - home_l6 * 180 / PI}"/>
+
+    <!-- Inversión solo para barras GUI: q' = -q, mismos topes físicos (lower'=-hi, upper'=-lo) -->
+    <xacro:macro name="joint_limit" params="lo hi">
+        <limit lower="${lo * PI / 180}" upper="${hi * PI / 180}" effort="${effort}" velocity="${velocity}"/>
+    </xacro:macro>
+    <xacro:macro name="joint_limit_inverted" params="lo hi">
+        <limit lower="${-hi * PI / 180}" upper="${-lo * PI / 180}" effort="${effort}" velocity="${velocity}"/>
+    </xacro:macro>
 
     <link name="world"/>
 
@@ -180,47 +225,71 @@
         <child link="limb1_1"/>
         <axis xyz="-0.0 0.0 1.0"/>
         <origin xyz="-0.00025 -0.006978 0.065594" rpy="0 0 0"/>
-        <limit lower="${-125*PI/180}" upper="${125*PI/180}" effort="${effort}" velocity="${velocity}"/>
+        <xacro:joint_limit lo="${lim_l1_lo}" hi="${lim_l1_hi}"/>
     </joint>
 
     <joint name="limb2_to_limb1" type="revolute">
-        <origin xyz="-0.0189 -0.031273 0.05415" rpy="3.14159 0 0"/>
+        <origin xyz="-0.0189 -0.031273 0.05415" rpy="${PI + home_l2} 0 0"/>
         <parent link="limb1_1"/>
         <child link="limb2_1"/>
-        <axis xyz="-1.0 -0.0 -0.0"/>
-        <limit lower="${-35*PI/180}" upper="${200*PI/180}" effort="${effort}" velocity="${velocity}"/>
+        <xacro:if value="$(arg invert_joint_sign)">
+            <axis xyz="1.0 0.0 0.0"/>
+            <xacro:joint_limit_inverted lo="${lim_l2_lo}" hi="${lim_l2_hi}"/>
+        </xacro:if>
+        <xacro:unless value="$(arg invert_joint_sign)">
+            <axis xyz="-1.0 -0.0 -0.0"/>
+            <xacro:joint_limit lo="${lim_l2_lo}" hi="${lim_l2_hi}"/>
+        </xacro:unless>
     </joint>
 
     <joint name="limb3_to_limb2" type="revolute">
-        <origin xyz="-0.0006 0.112809 0.026967" rpy="3.14159 0 0"/>
+        <origin xyz="-0.0006 0.112809 0.026967" rpy="${PI + home_l3} 0 0"/>
         <parent link="limb2_1"/>
         <child link="limb3_1"/>
-        <axis xyz="-1.0 -0.0 -0.0"/>
-        <limit lower="${-181*PI/180}" upper="${20*PI/180}" effort="${effort}" velocity="${velocity}"/>
+        <xacro:if value="$(arg invert_joint_sign)">
+            <axis xyz="1.0 0.0 0.0"/>
+            <xacro:joint_limit_inverted lo="${lim_l3_lo}" hi="${lim_l3_hi}"/>
+        </xacro:if>
+        <xacro:unless value="$(arg invert_joint_sign)">
+            <axis xyz="-1.0 -0.0 -0.0"/>
+            <xacro:joint_limit lo="${lim_l3_lo}" hi="${lim_l3_hi}"/>
+        </xacro:unless>
     </joint>
 
     <joint name="limb4_to_limb3" type="revolute">
-        <origin xyz="-0.0004 -0.134799 0.006374" rpy="0 0 0"/>
+        <origin xyz="-0.0004 -0.134799 0.006374" rpy="${home_l4} 0 0"/>
         <parent link="limb3_1"/>
         <child link="limb4_1"/>
-        <axis xyz="-1.0 -0.0 0.0"/>
-        <limit lower="${-PI/2}" upper="${PI/2}" effort="${effort}" velocity="${velocity}"/>
+        <xacro:if value="$(arg invert_joint_sign)">
+            <axis xyz="1.0 0.0 0.0"/>
+            <xacro:joint_limit_inverted lo="${lim_l4_lo}" hi="${lim_l4_hi}"/>
+        </xacro:if>
+        <xacro:unless value="$(arg invert_joint_sign)">
+            <axis xyz="-1.0 -0.0 0.0"/>
+            <xacro:joint_limit lo="${lim_l4_lo}" hi="${lim_l4_hi}"/>
+        </xacro:unless>
     </joint>
 
     <joint name="limb5_to_limb4" type="revolute">
-        <origin xyz="0.0181 -0.061298 0.000532" rpy="0 0 0"/>
+        <origin xyz="0.0181 -0.061298 0.000532" rpy="${home_l5} 0 0"/>
         <parent link="limb4_1"/>
         <child link="limb5_1"/>
-        <axis xyz="0.0 -0.999962 0.008688"/>
-        <limit lower="${-150*PI/180}" upper="${150*PI/180}" effort="${effort}" velocity="${velocity}"/>
+        <xacro:if value="$(arg invert_joint_sign)">
+            <axis xyz="0.0 0.999962 -0.008688"/>
+            <xacro:joint_limit_inverted lo="${lim_l5_lo}" hi="${lim_l5_hi}"/>
+        </xacro:if>
+        <xacro:unless value="$(arg invert_joint_sign)">
+            <axis xyz="0.0 -0.999962 0.008688"/>
+            <xacro:joint_limit lo="${lim_l5_lo}" hi="${lim_l5_hi}"/>
+        </xacro:unless>
     </joint>
 
     <joint name="limb6_to_limb5" type="revolute">
-        <origin xyz="0.019 -0.02322 0.020865" rpy="1.57 0 0"/>
+        <origin xyz="0.019 -0.02322 0.020865" rpy="${1.57 + home_l6} 0 0"/>
         <parent link="limb5_1"/>
         <child link="limb6_1"/>
         <axis xyz="1.0 0.0 0.0"/>
-        <limit lower="${-100*PI/180}" upper="${10*PI/180}" effort="${effort}" velocity="${velocity}"/>
+        <xacro:joint_limit lo="${lim_l6_lo}" hi="${lim_l6_hi}"/>
     </joint>
 
 </robot>

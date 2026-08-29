@@ -1,0 +1,37 @@
+/**:
+  ros__parameters:
+    source_topic: "/leader/joint_states"
+    target_topic: "/piper/joint_commands"
+
+    lerobot_joints:
+      - limb1_to_base_link
+      - limb2_to_limb1
+      - limb3_to_limb2
+      - limb4_to_limb3
+      - limb5_to_limb4
+
+    piper_joints:
+      - joint1
+      - joint2
+      - joint3
+      - joint5
+      - joint6
+
+    joint4_fixed: 0.0
+    joint_signs: [1.0, 1.0, 1.0, 1.0, 1.0]
+    joint_offsets: [0.0, 0.0, 0.0, 0.0, 0.0]
+
+    # limb6: -1.75 rad cerrado -> 0.04 m, 0.2 rad abierto -> 0.0 m (invertido vs Piper)
+    enable_gripper: true
+    lerobot_gripper_joint: limb6_to_limb5
+    lerobot_gripper_deg_min: -100.0
+    lerobot_gripper_deg_max: 11.5
+    piper_gripper_min: 0.04
+    piper_gripper_max: 0.0
+    gripper_effort: 1.0
+
+    publish_rate_hz: 50.0
+    publish_deadband: 0.002
+    gripper_deadband: 0.0005
+    smoothing_alpha: 0.85
+    motion_velocity_percent: 30.0

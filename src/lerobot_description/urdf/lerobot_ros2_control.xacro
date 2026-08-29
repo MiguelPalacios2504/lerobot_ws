@@ -36,6 +36,8 @@
                 <param name="max">${25*PI/180}</param>
             </command_interface>
             <state_interface name="position"/>
+            <state_interface name="velocity"/>
+            <state_interface name="effort"/>
         </joint>
 
         <joint name="limb2_to_limb1">
@@ -44,6 +46,8 @@
                 <param name="max">${35*PI/180}</param>
             </command_interface>
             <state_interface name="position"/>
+            <state_interface name="velocity"/>
+            <state_interface name="effort"/>
         </joint>
 
         <joint name="limb3_to_limb2">
@@ -52,6 +56,8 @@
                 <param name="max">${160*PI/180}</param>
             </command_interface>
             <state_interface name="position"/>
+            <state_interface name="velocity"/>
+            <state_interface name="effort"/>
         </joint>
 
         <joint name="limb4_to_limb3">
@@ -60,6 +66,8 @@
                 <param name="max">${PI / 2}</param>
             </command_interface>
             <state_interface name="position"/>
+            <state_interface name="velocity"/>
+            <state_interface name="effort"/>
         </joint>
 
         <joint name="limb5_to_limb4">
@@ -68,6 +76,8 @@
                 <param name="max">${150*PI/180}</param>
             </command_interface>
             <state_interface name="position"/>
+            <state_interface name="velocity"/>
+            <state_interface name="effort"/>
         </joint>
 
         <joint name="limb6_to_limb5">
@@ -76,6 +86,8 @@
                 <param name="max">${10*PI/180}</param>
             </command_interface>
             <state_interface name="position"/>
+            <state_interface name="velocity"/>
+            <state_interface name="effort"/>
         </joint>
 
     </ros2_control>

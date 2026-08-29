@@ -1,0 +1,6 @@
+# Entorno DDS para lerobot_ws (se activa al hacer source install/setup.bash).
+# FastDDS UDP: evita conflictos con rmw_cyclonedds_cpp de otros workspaces.
+unset CYCLONEDDS_URI
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+export ROS_DISABLE_DAEMON=1
+export FASTRTPS_DEFAULT_PROFILES_FILE="@LEROBOT_DDS_CONFIG@"

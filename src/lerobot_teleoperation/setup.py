@@ -12,6 +12,13 @@ setup(
         ('share/' + package_name + '/launch', [
             'launch/teleop_mirror.launch.py',
             'launch/dual_robot_teleop.launch.py',
+            'launch/lerobot_piper_teleop.launch.py',
+        ]),
+        ('share/' + package_name + '/config', [
+            'config/lerobot_to_piper_mapping.yaml',
+        ]),
+        ('share/' + package_name + '/scripts', [
+            'scripts/teleop_ros_env.bash',
         ]),
         ('share/' + package_name + '/rviz', ['rviz/teleop_dual.rviz']),
     ],
@@ -25,6 +32,7 @@ setup(
     entry_points={
         'console_scripts': [
             'mirror_joint_states_to_trajectory = lerobot_teleoperation.mirror_joint_states_to_trajectory:main',
+            'lerobot_to_piper_bridge = lerobot_teleoperation.lerobot_to_piper_bridge:main',
         ],
     },
 )

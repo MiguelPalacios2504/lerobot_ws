@@ -36,7 +36,7 @@ Joint angles: 0°, 90°, -90°, 0°, 0°, 0°
 Change the offset so you can get in this position the next values, otherwise you will have to do extra setting actions.
 
 ```
-Default values: 2179, 3594, 345, 2354, 2165, 2275
+Default values: 2179, 936, 3061, 2067, 2055, 2160
 ```
 
 <p align="center">
@@ -67,9 +67,11 @@ sudo apt install ros-humble-desktop ros-humble-gazebo-ros-pkgs python3-colcon-co
 
 ### Demo Robot Limits and joint visualization
 ```bash
-ros2 launch lerobot_description displaz.launch.py is_sim:=true
-
+source install/setup.bash
+ros2 launch lerobot_description joints_gui.launch.py
 ```
+Mueve cada articulación con las **barras deslizantes** y compara el modelo RViz con el brazo físico (calibración del gemelo).
+
 <p align="center">
   <img src="images/demo.png" alt="LeRobot demo" width="600"/>
 </p>
@@ -111,8 +113,11 @@ ros2 launch lerobot_description rviz.launch.py is_sim:=true
 For running the **real robot** (connected via `/dev/ttyACM0`, baudrate `1000000`):
 
 ```bash
-ros2 launch lerobot_controller controller.launch.py is_sim:=false
+source install/setup.bash
+ros2 launch lerobot_controller controller.launch.py is_sim:=false uart_port:=/dev/ttyACM0
 ```
+
+> En cada terminal: `cd ~/Documents/GIthub/lerobot_ws` y `source install/setup.bash`. El workspace configura FastDDS automáticamente (necesario si tu `.bashrc` usa CycloneDDS).
 <p align="center">
   <img src="images/rviz_real.png" alt="LeRobot real with rviz" width="600"/>
 </p>
@@ -120,9 +125,22 @@ ros2 launch lerobot_controller controller.launch.py is_sim:=false
 
 ### Motion Planning with MoveIt
 
-**Real robot:** it depends in which mode you would like to work is_sim:true (simulation) is_sim: false (real robot)
+**Real robot** (controller must already be running in another terminal):
+
 ```bash
+# Terminal 1
+source install/setup.bash
+ros2 launch lerobot_controller controller.launch.py is_sim:=false uart_port:=/dev/ttyACM0
+
+# Terminal 2 (después de que los 3 controladores estén activos)
+source install/setup.bash
 ros2 launch lerobot_moveit moveit.launch.py
+```
+
+**Simulation:**
+
+```bash
+source install/setup.bash
 ros2 launch lerobot_moveit moveit.launch.py is_sim:=true
 ```
 <p align="center">

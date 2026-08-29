@@ -37,6 +37,7 @@ private:
   uint16_t move_time_ms_ = 200;
   bool passive_mode_ = false;
   double command_deadband_ = 0.003;
+  double max_effort_nm_ = 30.0;
 
   double scale_ = 4096.0 / (2.0 * M_PI);
   std::vector<int> offsets_raw_;
@@ -62,6 +63,9 @@ private:
   // utilidades
   uint16_t rad_to_raw(int i, double rad) const;
   double   raw_to_rad(int i, uint16_t raw) const;
+  // Convención URDF invert_joint_sign:=true (joints 2-5, índices 1-4)
+  double to_urdf_angle(int i, double rad) const;
+  double from_urdf_angle(int i, double rad) const;
 };
 
 } // namespace lerobot_controller

@@ -23,6 +23,18 @@ static constexpr uint8_t ADDR_TORQUE_ENABLE = 0x28;
 static constexpr uint8_t ADDR_PRESENT_POS   = 0x38;
 static constexpr uint8_t ADDR_PRESENT_SPEED = 0x3A;
 static constexpr uint8_t ADDR_PRESENT_LOAD  = 0x3C;
+static constexpr uint8_t ADDR_PRESENT_CURRENT = 0x45;
+
+/// ST3215 Present Load: bits 0-9 magnitud (0-1000), bit 10 dirección.
+inline int16_t decodePresentLoad(uint16_t raw) {
+  const int magnitude = static_cast<int>(raw & 0x3FF);
+  return (raw & 0x400) ? -magnitude : magnitude;
+}
+
+/// Corriente en mA (registro × 6.5 mA según datasheet Feetech).
+inline double presentCurrentMilliAmps(uint16_t raw) {
+  return static_cast<double>(raw) * 6.5;
+}
 
 inline uint8_t chksum(uint8_t id, uint8_t length, uint8_t inst, const std::vector<uint8_t>& params) {
   uint32_t s = id + length + inst;
@@ -83,12 +95,19 @@ public:
         auto d = readRegs(ids[i], ADDR_PRESENT_POS, 6);
         states[i].pos  = static_cast<uint16_t>(d[0] | (d[1]<<8));
         states[i].vel  = static_cast<int16_t>(d[2] | (d[3]<<8));
-        states[i].load = static_cast<int16_t>(d[4] | (d[5]<<8));
+        states[i].load = decodePresentLoad(static_cast<uint16_t>(d[4] | (d[5]<<8)));
       } catch (...) {
         states[i] = ServoState{};
       }
     }
     return states;
+  }
+
+  /// Lee corriente presente (mA) de un servo.
+  double readPresentCurrentMilliAmps(uint8_t id) {
+    auto d = readRegs(id, ADDR_PRESENT_CURRENT, 2);
+    const uint16_t raw = static_cast<uint16_t>(d[0] | (d[1] << 8));
+    return presentCurrentMilliAmps(raw);
   }
 
   void setTorqueEnable(uint8_t id, bool enable) {

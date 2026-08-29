@@ -1,7 +1,7 @@
 import os
 import yaml
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, TimerAction
+from launch.actions import DeclareLaunchArgument, LogInfo, SetEnvironmentVariable, TimerAction
 from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
@@ -31,6 +31,7 @@ def generate_launch_description():
             mappings={
                 "is_sim": is_sim,
                 "is_ignition": is_ignition,
+                "invert_joint_sign": "true",
             },
         )
         .robot_description_semantic(file_path="config/lerobot.srdf")
@@ -43,6 +44,8 @@ def generate_launch_description():
 
     # === Rutas de controladores MoveIt (HW y SIM separados) ===
     pkg_moveit = get_package_share_directory("lerobot_moveit")
+    pkg_ctrl = get_package_share_directory("lerobot_controller")
+    fastdds_xml = os.path.join(pkg_ctrl, "config", "fastdds_no_shm.xml")
     controllers_hw_path = os.path.join(pkg_moveit, "config", "moveit_controllers.yaml")
     controllers_sim_path = os.path.join(pkg_moveit, "config", "moveit_controllers_sim.yaml")
 
@@ -51,10 +54,21 @@ def generate_launch_description():
     with open(controllers_sim_path, "r") as f:
         moveit_controllers_sim = yaml.safe_load(f)
 
-    # === move_group (dos variantes, cada una con su YAML y use_sim_time literal) ===
-    common_move_group_params = [
+    # HW: controller.launch.py ya activó arm/gripper → MoveIt solo envía trayectorias.
+    move_group_hw_params = [
         moveit_config.to_dict(),
-        {"planning_scene_monitor.use_robot_state_topic": True},
+        {"planning_scene_monitor.joint_state_topic": "/joint_states"},
+        {"planning_scene_monitor.publish_robot_description": True},
+        {"planning_scene_monitor.publish_planning_scene": True},
+        {"planning_scene_monitor.publish_state_updates": True},
+        {"planning_scene_monitor.publish_transforms_updates": True},
+        {"allow_trajectory_execution": True},
+        {"moveit_manage_controllers": False},
+        {"trajectory_execution.allowed_start_tolerance": 0.05},
+    ]
+
+    move_group_sim_params = [
+        moveit_config.to_dict(),
         {"planning_scene_monitor.publish_robot_description": True},
         {"planning_scene_monitor.publish_planning_scene": True},
         {"allow_trajectory_execution": True},
@@ -65,7 +79,7 @@ def generate_launch_description():
         package="moveit_ros_move_group",
         executable="move_group",
         output="screen",
-        parameters=common_move_group_params + [moveit_controllers_hw, {"use_sim_time": False}],
+        parameters=move_group_hw_params + [moveit_controllers_hw, {"use_sim_time": False}],
         arguments=["--ros-args", "--log-level", "info"],
         condition=UnlessCondition(is_sim),
     )
@@ -74,7 +88,7 @@ def generate_launch_description():
         package="moveit_ros_move_group",
         executable="move_group",
         output="screen",
-        parameters=common_move_group_params + [moveit_controllers_sim, {"use_sim_time": True}],
+        parameters=move_group_sim_params + [moveit_controllers_sim, {"use_sim_time": True}],
         arguments=["--ros-args", "--log-level", "info"],
         condition=IfCondition(is_sim),
     )
@@ -117,10 +131,24 @@ def generate_launch_description():
         condition=IfCondition(is_sim),
     )
 
+    delayed_rviz_hw = TimerAction(
+        period=2.0,
+        actions=[rviz_hw],
+        condition=UnlessCondition(is_sim),
+    )
+
     return LaunchDescription([
+        SetEnvironmentVariable("RMW_IMPLEMENTATION", "rmw_fastrtps_cpp"),
+        SetEnvironmentVariable("FASTRTPS_DEFAULT_PROFILES_FILE", fastdds_xml),
+        LogInfo(
+            msg=(
+                "[lerobot_moveit] HW: requiere controller.launch.py activo en otra terminal "
+                "(publicando /joint_states y TF). Usa source install/setup.bash en ambas terminales."
+            )
+        ),
         is_sim_arg,
         move_group_hw,
         delayed_move_group_sim,
-        rviz_hw,
+        delayed_rviz_hw,
         rviz_sim,
     ])
